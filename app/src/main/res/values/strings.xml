@@ -3,4 +3,9 @@
     <string name="table">Table</string>
     <string name="settings">Settings</string>
     <string name="title_notifications">Notifications</string>
+    <string name="table_title">Table Number</string>
+    <string name="table_message">Enter the table number</string>
+    <string name="ok">OK</string>
+    <string name="cancel">CANCEL</string>
+    <string name="arrow_navigation">arrow navigation</string>
 </resources>
