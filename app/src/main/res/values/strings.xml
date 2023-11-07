@@ -8,4 +8,9 @@
     <string name="ok">OK</string>
     <string name="cancel">CANCEL</string>
     <string name="arrow_navigation">arrow navigation</string>
+    <string name="add_food_item">Add Food Item</string>
+    <string name="generate_qr_code">Generate QR Code</string>
+    <string name="print_receipt">Print Receipt</string>
+    <string name="expire_hour">Expire Hour</string>
+    <string name="expire_minute">Expire Minute</string>
 </resources>

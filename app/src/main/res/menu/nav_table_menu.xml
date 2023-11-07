@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:id="@+id/table_drawer">
+        <item
+            android:id="@+id/add_food_item"
+            android:icon="@drawable/ic_add_food_item"
+            android:title="@string/add_food_item" />
+
+        <item
+            android:id="@+id/generate_qr_code"
+            android:icon="@drawable/ic_qr_code"
+            android:title="@string/generate_qr_code" />
+
+        <item
+            android:id="@+id/print_receipt"
+            android:icon="@drawable/ic_printer_receipt"
+            android:title="@string/print_receipt" />
+    </group>
+
+</menu>
