@@ -6,17 +6,73 @@
     android:layout_height="match_parent"
     tools:context=".ui.settings.SettingsFragment">
 
-    <TextView
-        android:id="@+id/text_dashboard"
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/menu_type_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Menu Type"
+        android:padding="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@+id/divider_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/menu_type_textview"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/menu_item_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Menu Item"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/divider_1"/>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@+id/divider_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/menu_item_textview"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/additional_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Additional"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/divider_2" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@+id/divider_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/additional_textview"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/report_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Report"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/divider_3" />
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@+id/divider_4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/report_textview"/>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/nav_view_settings"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
+        android:background="?android:attr/windowBackground"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

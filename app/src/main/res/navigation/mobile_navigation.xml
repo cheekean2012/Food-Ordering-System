@@ -17,13 +17,31 @@
             app:exitAnim="@android:anim/fade_out"
             app:popEnterAnim="@android:anim/fade_in"
             app:popExitAnim="@android:anim/fade_out" />
+        <action
+            android:id="@+id/action_navigation_table_to_navigation_settings"
+            app:destination="@id/navigation_settings"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_settings"
         android:name="com.example.foodOrderingSystem.ui.settings.SettingsFragment"
         android:label="@string/settings"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_navigation_settings_to_navigation_table"
+            app:destination="@id/navigation_table"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
+        <action
+            android:id="@+id/action_navigation_settings_to_menuTypeFragment"
+            app:destination="@id/menuTypeFragment" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_table_customer_order"
         android:name="com.example.foodOrderingSystem.ui.table.TableCustomerOrderFragment"
@@ -37,6 +55,17 @@
             app:popEnterAnim="@android:anim/fade_in"
             app:popExitAnim="@android:anim/fade_out"
             app:popUpTo="@id/navigation_table"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/menuTypeFragment"
+        android:name="com.example.foodOrderingSystem.menu.MenuTypeFragment"
+        android:label="fragment_menu_type"
+        tools:layout="@layout/fragment_menu_type" >
+        <action
+            android:id="@+id/action_menuTypeFragment_to_navigation_settings"
+            app:destination="@id/navigation_settings"
+            app:popUpTo="@id/navigation_settings"
             app:popUpToInclusive="true" />
     </fragment>
 

@@ -51,6 +51,24 @@ class TableFragment : Fragment() {
         val navController = findNavController()
         navView.setupWithNavController(navController)
 
+        navView.setOnItemSelectedListener  { item ->
+            when (item.itemId) {
+                R.id.navigation_table -> {
+                    if (!item.isChecked) {
+                        navController.navigate(R.id.navigation_table)
+                    }
+                    true
+                }
+                R.id.navigation_settings -> {
+                    if (!item.isChecked) {
+                        navController.navigate(R.id.navigation_settings)
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+
         tableList = tableViewModel.tableList
 
         recyclerView = binding.tableRecycleView

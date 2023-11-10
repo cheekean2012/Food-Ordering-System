@@ -13,4 +13,10 @@
     <string name="print_receipt">Print Receipt</string>
     <string name="expire_hour">Expire Hour</string>
     <string name="expire_minute">Expire Minute</string>
+    <string name="delete_menu_type">Delete Menu Type</string>
+    <string name="confirm_delete_menu_type">Are you sure want to delete it?</string>
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="enter_the_menu_type">Enter The Menu Type</string>
+    <string name="menu_type">Menu Type</string>
 </resources>
