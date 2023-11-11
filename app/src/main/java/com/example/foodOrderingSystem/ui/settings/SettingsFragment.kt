@@ -4,16 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodOrderingSystem.R
-import com.example.foodOrderingSystem.adapters.TableListAdapter
 import com.example.foodOrderingSystem.databinding.FragmentSettingsBinding
-import com.example.foodOrderingSystem.databinding.FragmentTableBinding
 import com.example.foodOrderingSystem.utils.Utils
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -57,13 +52,14 @@ class SettingsFragment : Fragment() {
         }
 
         binding.apply {
-            menuTypeTextview.setOnClickListener { goToMenuTypePage() }
+            menuTypeTextview.setOnClickListener { goToNextPage(R.id.action_navigation_settings_to_menuTypeFragment) }
+            menuItemTextview.setOnClickListener { goToNextPage(R.id.action_navigation_settings_to_menuItemListFragment) }
         }
 
     }
 
-    private fun goToMenuTypePage() {
-        Utils().goToNextNavigate(this, R.id.action_navigation_settings_to_menuTypeFragment)
+    private fun goToNextPage(nextDestination: Int) {
+        Utils().goToNextNavigate(this, nextDestination)
     }
 
     override fun onDestroyView() {

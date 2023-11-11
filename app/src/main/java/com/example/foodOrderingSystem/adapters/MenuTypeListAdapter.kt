@@ -15,9 +15,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.foodOrderingSystem.R
 import com.example.foodOrderingSystem.databinding.ListMenuTypeBinding
 import com.example.foodOrderingSystem.models.MenuType
-import com.example.foodOrderingSystem.models.MenuViewModel
+import com.example.foodOrderingSystem.models.MenuTypeViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import java.util.UUID
 
 class MenuTypeListAdapter (
     private val activity: Fragment,
@@ -25,11 +24,11 @@ class MenuTypeListAdapter (
     private val menuTypeList: LiveData<MutableList<MenuType>>
 ): RecyclerView.Adapter<MenuTypeListAdapter.ItemViewHolder>() {
 
-    private val menuTypeViewModel: MenuViewModel by activity.activityViewModels()
+    private val menuTypeViewModel: MenuTypeViewModel by activity.activityViewModels()
 
     inner class ItemViewHolder(private val view: ListMenuTypeBinding) :
         RecyclerView.ViewHolder(view.root) {
-        val menuTypeTextView: TextView = view.menuTypeTextview
+        var menuTypeTextView: TextView = view.menuTypeTextview
         private var editMenuType: ImageView = view.editMenuType
         private var deleteMenuType: ImageView = view.deleteMenuType
 
@@ -79,7 +78,7 @@ class MenuTypeListAdapter (
 
             MaterialAlertDialogBuilder(context)
                 .setTitle(context.getString(R.string.delete_menu_type))
-                .setMessage(context.getString(R.string.confirm_delete_menu_type, getPosition.menuType))
+                .setMessage(context.getString(R.string.confirm_delete_menu_type))
                 .setNegativeButton(activity.resources.getString(R.string.cancel)) { dialog, _ ->
                     // Respond to negative button press
                     dialog.dismiss()

@@ -14,9 +14,18 @@
     <string name="expire_hour">Expire Hour</string>
     <string name="expire_minute">Expire Minute</string>
     <string name="delete_menu_type">Delete Menu Type</string>
+    <string name="delete_menu_item">Delete Menu Item</string>
     <string name="confirm_delete_menu_type">Are you sure want to delete it?</string>
-<!-- TODO: Remove or change this placeholder text -->
+    <string name="confirm_delete_menu_item">Are you sure want to delete it?</string>
+    <string name="rm">RM</string>
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="enter_the_menu_type">Enter The Menu Type</string>
     <string name="menu_type">Menu Type</string>
+    <string name="upload_image">Upload Image</string>
+    <string name="available">Available</string>
+    <string name="takeaway">Takeaway</string>
+    <string name="food_item_name">Food Item Name</string>
+    <string name="food_item_price">Food Item Price</string>
+    <string name="food_item_ingredient">Food Item Ingredient</string>
 </resources>

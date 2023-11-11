@@ -8,19 +8,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
-import androidx.compose.ui.text.toUpperCase
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodOrderingSystem.R
 import com.example.foodOrderingSystem.adapters.MenuTypeListAdapter
-import com.example.foodOrderingSystem.adapters.TableListAdapter
 import com.example.foodOrderingSystem.databinding.FragmentMenuTypeBinding
 import com.example.foodOrderingSystem.models.MenuType
-import com.example.foodOrderingSystem.models.MenuViewModel
-import com.example.foodOrderingSystem.models.TableViewModel
-import com.example.foodOrderingSystem.models.Tables
+import com.example.foodOrderingSystem.models.MenuTypeViewModel
 import com.example.foodOrderingSystem.utils.Utils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.UUID
@@ -31,7 +27,7 @@ class MenuTypeFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var recyclerView: RecyclerView
     private lateinit var menuTypeList: LiveData<MutableList<MenuType>>
-    private val menuTypeViewModel: MenuViewModel by activityViewModels()
+    private val menuTypeViewModel: MenuTypeViewModel by activityViewModels()
 
 
     override fun onCreateView(

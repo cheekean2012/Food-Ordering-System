@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.example.foodOrderingSystem.models.MenuItemViewModel" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/topAppBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="8dp"
+            android:fitsSystemWindows="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/topAppBar"
+                android:layout_width="match_parent"
+                android:elevation="0dp"
+                app:tint="?attr/colorOnSurface"
+                app:elevation="0dp"
+                android:background="?android:attr/windowBackground"
+                android:layout_height="?attr/actionBarSize"
+                app:navigationIcon="@drawable/ic_left_arrow">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/delete_menu_item"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/ic_delete"
+                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.appbar.MaterialToolbar>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:scrollbars="none"
+            android:layout_marginTop="65dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/topAppBarLayout"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/dialog_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" >
+
+                <ImageView
+                    android:id="@+id/detail_menu_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:background="#FFCCCCCC"
+                    android:src="@drawable/ic_photo"
+                    android:contentDescription="@string/upload_image"
+                    android:layout_marginHorizontal="16dp"
+                    android:elevation="8dp"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/menu_item_name_textField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:layout_marginTop="8dp"
+                    android:elevation="4dp"
+                    android:padding="8dp"
+                    app:layout_constraintWidth_max="wrap"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/detail_menu_image">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/menu_item_name_editText"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="@{viewModel.menuItemName.toString()}"
+                        android:hint="@string/food_item_name"
+                        android:inputType="text|textNoSuggestions" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Spinner
+                    android:id="@+id/menu_type_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="8dp"
+                    android:elevation="4dp"
+                    android:padding="8dp"
+                    android:background="@drawable/border_background"
+                    app:layout_constraintWidth_max="wrap"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/menu_item_name_textField"/>
+
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/menu_item_price_textField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:layout_marginTop="8dp"
+                    android:elevation="4dp"
+                    android:padding="8dp"
+                    app:layout_constraintWidth_max="wrap"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/menu_type_spinner">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/menu_item_price_editText"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="@{viewModel.menuPrice.toString()}"
+                        android:hint="@string/food_item_price"
+                        android:inputType="numberDecimal|textNoSuggestions" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/menu_item_ingredient_textField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:elevation="4dp"
+                    android:padding="8dp"
+                    android:scrollbars="vertical"
+                    android:scrollbarStyle="insideOverlay"
+                    android:fitsSystemWindows="true"
+                    app:layout_constraintWidth_max="wrap"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/menu_item_price_textField">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/menu_item_ingredient_editText"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:lines="4"
+                        android:gravity="start"
+                        android:scrollbars="vertical"
+                        android:overScrollMode="ifContentScrolls"
+                        android:scrollbarStyle="insideInset"
+                        android:layout_marginHorizontal="8dp"
+                        android:layout_marginTop="8dp"
+                        android:elevation="4dp"
+                        android:padding="8dp"
+                        android:text="@{viewModel.menuIngredient.toString()}"
+                        android:hint="@string/food_item_ingredient"
+                        android:inputType="textMultiLine" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/menu_item_available"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="8dp"
+                    android:elevation="4dp"
+                    android:padding="8dp"
+                    android:text="@string/available"
+                    android:textSize="18sp"
+                    android:checked="@{viewModel.menuAvailable}"
+                    app:layout_constraintWidth_max="wrap"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/menu_item_ingredient_textField" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/menu_item_takeaway"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="8dp"
+                    android:elevation="4dp"
+                    android:padding="8dp"
+                    android:text="@string/takeaway"
+                    android:textSize="18sp"
+                    android:visibility="invisible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/menu_item_ingredient_textField" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/menu_item_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:elevation="8dp"
+                    android:layout_marginTop="16dp"
+                    android:padding="16dp"
+                    android:text="SAVE CHANGES"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/menu_item_available" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

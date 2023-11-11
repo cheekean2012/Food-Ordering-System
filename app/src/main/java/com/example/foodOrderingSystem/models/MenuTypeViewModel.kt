@@ -1,15 +1,11 @@
 package com.example.foodOrderingSystem.models
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 //import com.example.foodOrderingSystem.database.AppDatabase
-import kotlinx.coroutines.launch
 
-class MenuViewModel : ViewModel() {
+class MenuTypeViewModel : ViewModel() {
 
     private val _menuTypeList = MutableLiveData<MutableList<MenuType>>()
 
@@ -18,6 +14,9 @@ class MenuViewModel : ViewModel() {
 
     private val _menuTypeId = MutableLiveData<String?>()
     val menuTypeId: LiveData<String?> get() = _menuTypeId
+
+    private val _menuType = MutableLiveData<String?>()
+    val menuType: LiveData<String?> get() = _menuType
 
     init {
         _menuTypeList.value = ArrayList()
@@ -46,6 +45,10 @@ class MenuViewModel : ViewModel() {
 
     fun setMenuTypeId(id: String) {
         _menuTypeId.value = id
+    }
+
+    fun setMenuType(type: String) {
+        _menuType.value = type
     }
 }
 

@@ -17,10 +17,7 @@ data class Tables(
     var tableNumber: String = ""
 )
 
-data class MenuType(
-   val id: String? = null,
-   val menuType: String = ""
-)
+
 
 //
 //@Entity(tableName = "menu_types")
