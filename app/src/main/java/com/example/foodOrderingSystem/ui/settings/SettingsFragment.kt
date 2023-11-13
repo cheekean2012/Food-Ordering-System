@@ -54,6 +54,7 @@ class SettingsFragment : Fragment() {
         binding.apply {
             menuTypeTextview.setOnClickListener { goToNextPage(R.id.action_navigation_settings_to_menuTypeFragment) }
             menuItemTextview.setOnClickListener { goToNextPage(R.id.action_navigation_settings_to_menuItemListFragment) }
+            printerTextview.setOnClickListener { goToNextPage(R.id.action_navigation_settings_to_navigation_printerFragment) }
         }
 
     }

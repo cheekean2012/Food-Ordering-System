@@ -14,6 +14,7 @@ import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodOrderingSystem.R
 import com.example.foodOrderingSystem.databinding.ListMenuTypeBinding
+import com.example.foodOrderingSystem.firestore.Firestore
 import com.example.foodOrderingSystem.models.MenuType
 import com.example.foodOrderingSystem.models.MenuTypeViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -61,6 +62,7 @@ class MenuTypeListAdapter (
 
                         // Specify the item when data has been changed and display
                         notifyItemChanged(adapterPosition)
+                        Firestore().updateMenuType(activity, context, updatedItem)
 
                         dialog.dismiss()
                     } else {
@@ -89,6 +91,7 @@ class MenuTypeListAdapter (
 
                     // Notify the adapter that an item has been removed
                     notifyItemRemoved(adapterPosition)
+                    Firestore().deleteMenuType(getPosition.id)
                 }
                 .show()
         }

@@ -29,6 +29,7 @@ import com.bumptech.glide.Glide
 import com.example.foodOrderingSystem.R
 import com.example.foodOrderingSystem.adapters.MenuItemListAdapter
 import com.example.foodOrderingSystem.databinding.FragmentMenuItemListBinding
+import com.example.foodOrderingSystem.firestore.Firestore
 import com.example.foodOrderingSystem.models.MenuItem
 import com.example.foodOrderingSystem.models.MenuItemViewModel
 import com.example.foodOrderingSystem.models.MenuTypeViewModel
@@ -94,6 +95,10 @@ class MenuItemListFragment : Fragment() {
             // Update your RecyclerView adapter when the LiveData changes
             recyclerView.adapter = MenuItemListAdapter(this, requireContext(), menuItemList)
         }
+
+        // Get data from firebase
+        Firestore().loadSpinnerMenuType(menuTypeViewModel)
+        Firestore().getMenuItem(this, recyclerView, menuItemViewModel,)
 
         binding.apply {
             addMenuItem.setOnClickListener{ addMenuItem() }
@@ -183,6 +188,7 @@ class MenuItemListFragment : Fragment() {
                 menuItemViewModel.addMenuItem(menuItem)
                 Log.d("get menu item value: ", menuItem.toString())
                 recyclerView.adapter = MenuItemListAdapter(this, requireContext(), menuItemList)
+                Firestore().uploadMenuItem(this, requireContext(), menuItem, recyclerView, menuItemList)
                 dialog.dismiss()
 
             } else {

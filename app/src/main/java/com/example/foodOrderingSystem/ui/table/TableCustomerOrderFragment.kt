@@ -15,10 +15,7 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.example.foodOrderingSystem.R
-import com.example.foodOrderingSystem.adapters.TableListAdapter
-import com.example.foodOrderingSystem.databinding.FragmentTableBinding
 import com.example.foodOrderingSystem.databinding.FragmentTableCustomerOrderBinding
-import com.example.foodOrderingSystem.models.Tables
 import com.example.foodOrderingSystem.utils.Utils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
@@ -26,8 +23,11 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import java.sql.Date
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.EnumMap
-import java.util.UUID
+import java.util.Locale
 
 class TableCustomerOrderFragment: Fragment() {
 
@@ -91,23 +91,29 @@ class TableCustomerOrderFragment: Fragment() {
         qrGenerateButton.setOnClickListener {
             val baseUrl = "http://10.100.65.59:8080"
             val tableNumber = 7 // Replace with the actual table number
-//            val expirationTime = calculateExpirationTime() // Function to calculate the expiration time
+            var hourString = hourEditText.text.toString()
+            var minuteString = minuteEditText.text.toString()
 
-            // Generate the QR code with the modified URL
-            val qrCode = generateQRCode("$baseUrl?tableNumber=$tableNumber")
+            if (hourString.isNotEmpty() && minuteString.isNotEmpty()) {
+                val expirationTime = calculateExpirationTime(hourString.toInt(), minuteString.toInt())
+
+                // Generate the QR code with the modified URL
+                val qrCode = generateQRCode("$baseUrl?tableNumber=$tableNumber")
+
+                // Display the QR code in an ImageView
+                qrImage.setImageBitmap(qrCode)
 
 
-            // Display the QR code in an ImageView
-            qrImage.setImageBitmap(qrCode)
+                textView.text = "Expire Date: " + expirationTime
+                textView.isVisible = true
 
-
-            textView.text = "Expire Date: " + hourEditText.text + ":" + minuteEditText.text
-            textView.isVisible = true
-
-            val hourTextView: TextInputLayout  = inflater.findViewById(R.id.qr_code_expire_hour_field)
-            val minuteTextView: TextInputLayout = inflater.findViewById(R.id.qr_code_expire_minute_field)
-            hourTextView.isVisible = false
-            minuteTextView.isVisible = false
+                val hourTextView: TextInputLayout  = inflater.findViewById(R.id.qr_code_expire_hour_field)
+                val minuteTextView: TextInputLayout = inflater.findViewById(R.id.qr_code_expire_minute_field)
+                hourTextView.isVisible = false
+                minuteTextView.isVisible = false
+            } else {
+                Toast.makeText(requireContext(), "Please enter the time", Toast.LENGTH_SHORT).show()
+            }
         }
 
         MaterialAlertDialogBuilder(requireContext())
@@ -135,6 +141,19 @@ class TableCustomerOrderFragment: Fragment() {
         }
 
         return bitmap
+    }
+
+    private fun calculateExpirationTime(hour: Int, minute: Int): String {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = System.currentTimeMillis()
+
+        // Set the expiration time
+        calendar.add(Calendar.HOUR_OF_DAY, hour)
+        calendar.add(Calendar.MINUTE, minute)
+
+        // Format the expiration time
+        val sdf = SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault())
+        return sdf.format(calendar.time)
     }
 
     private fun backToPrevious() {

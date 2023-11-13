@@ -36,8 +36,22 @@ class MenuItemViewModel: ViewModel() {
         _menuItemList.value = ArrayList()
     }
 
+    fun setMenuItems(menuItems: MutableList<MenuItem>) {
+        _menuItemList.value = menuItems
+    }
+
     fun addMenuItem(menuItem: MenuItem) {
         _menuItemList.value!!.add(menuItem)
+    }
+
+    fun updateMenuItem(menuItem: MenuItem) {
+        val currentList = _menuItemList.value ?: mutableListOf()
+
+        val getUpdateIndex = currentList.indexOfFirst { menuItem.id == it.id }
+
+        currentList[getUpdateIndex] = menuItem
+
+        _menuItemList.value = currentList
     }
 
     fun deleteMenuItem(id: String) {

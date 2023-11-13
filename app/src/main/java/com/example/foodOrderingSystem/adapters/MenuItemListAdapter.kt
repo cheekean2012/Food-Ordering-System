@@ -35,6 +35,7 @@ import com.example.foodOrderingSystem.models.MenuTypeViewModel
 import com.example.foodOrderingSystem.utils.Utils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
+import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.UUID
 
@@ -102,9 +103,10 @@ class MenuItemListAdapter (
 
         holder.itemName.text = item.itemName
         holder.itemType.text = item.type
-        val priceFormat = NumberFormat.getInstance().format(item.price.toDouble())
-        val formattedPrice = "RM$priceFormat"
+        val priceFormat = DecimalFormat("RM0.00")
+        val formattedPrice = priceFormat.format(item.price.toDouble())
         holder.itemPrice.text = formattedPrice
+
 
     }
 

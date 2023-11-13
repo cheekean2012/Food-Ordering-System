@@ -22,6 +22,9 @@ class MenuTypeViewModel : ViewModel() {
         _menuTypeList.value = ArrayList()
     }
 
+    fun setMenuTypes(menuTypes: MutableList<MenuType>) {
+        _menuTypeList.value = menuTypes
+    }
 
     fun addMenuType(menuType: MenuType) {
         _menuTypeList.value!!.add(menuType)

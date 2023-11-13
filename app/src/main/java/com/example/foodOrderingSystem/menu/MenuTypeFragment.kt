@@ -9,12 +9,13 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodOrderingSystem.R
 import com.example.foodOrderingSystem.adapters.MenuTypeListAdapter
 import com.example.foodOrderingSystem.databinding.FragmentMenuTypeBinding
+import com.example.foodOrderingSystem.firestore.Firestore
 import com.example.foodOrderingSystem.models.MenuType
 import com.example.foodOrderingSystem.models.MenuTypeViewModel
 import com.example.foodOrderingSystem.utils.Utils
@@ -26,7 +27,7 @@ class MenuTypeFragment : Fragment() {
     private var _binding: FragmentMenuTypeBinding? = null
     private val binding get() = _binding!!
     private lateinit var recyclerView: RecyclerView
-    private lateinit var menuTypeList: LiveData<MutableList<MenuType>>
+    private lateinit var menuTypeList: MutableLiveData<MutableList<MenuType>>
     private val menuTypeViewModel: MenuTypeViewModel by activityViewModels()
 
 
@@ -52,6 +53,9 @@ class MenuTypeFragment : Fragment() {
             // Update your RecyclerView adapter when the LiveData changes
             recyclerView.adapter = MenuTypeListAdapter(this, requireContext(), menuTypeList)
         }
+
+        // Get data from firebase
+        Firestore().getMenuType(this, recyclerView, menuTypeViewModel)
 
         binding.apply {
             addMenuType.setOnClickListener{ addMenuType() }
@@ -91,6 +95,7 @@ class MenuTypeFragment : Fragment() {
                     menuTypeViewModel.addMenuType(item)
                     Log.d("get Item value", item.toString())
                     recyclerView.adapter = MenuTypeListAdapter(this, requireContext(), menuTypeList)
+                    Firestore().uploadMenuType(this, requireContext(), item, recyclerView, menuTypeList)
 
                     // Notify the adapter that the data has changed
 //                    recyclerView.adapter?.notifyItemInserted(tableList.size - 1)

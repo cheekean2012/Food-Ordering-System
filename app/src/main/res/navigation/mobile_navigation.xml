@@ -44,6 +44,9 @@
         <action
             android:id="@+id/action_navigation_settings_to_menuItemListFragment"
             app:destination="@id/navigation_menu_item_list" />
+        <action
+            android:id="@+id/action_navigation_settings_to_navigation_printerFragment"
+            app:destination="@id/navigation_printerFragment" />
     </fragment>
     <fragment
         android:id="@+id/navigation_table_customer_order"
@@ -94,6 +97,17 @@
             android:id="@+id/action_menuItemDetailFragment_to_menuItemListFragment"
             app:destination="@id/navigation_menu_item_list"
             app:popUpTo="@id/navigation_menu_item_list"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_printerFragment"
+        android:name="com.example.foodOrderingSystem.PrinterFragment"
+        android:label="fragment_printer"
+        tools:layout="@layout/fragment_printer" >
+        <action
+            android:id="@+id/action_navigation_printerFragment_to_navigation_settings"
+            app:destination="@id/navigation_settings"
+            app:popUpTo="@id/navigation_settings"
             app:popUpToInclusive="true" />
     </fragment>
 

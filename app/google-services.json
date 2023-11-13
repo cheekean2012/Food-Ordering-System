@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "615760522349",
+    "project_id": "foodorderingsystem-a59e8",
+    "storage_bucket": "foodorderingsystem-a59e8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:615760522349:android:ec33de0ffe4979d5186364",
+        "android_client_info": {
+          "package_name": "com.example.foodOrderingSystem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGQorDbLmuADBdl_KSpI3xXnsvJ3g-CIA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

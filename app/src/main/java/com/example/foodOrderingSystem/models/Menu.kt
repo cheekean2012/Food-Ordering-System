@@ -7,7 +7,7 @@ data class MenuType(
 
 data class MenuItem (
     val id: String? = null,
-    val image: String = "",
+    var image: String = "",
     val itemName: String = "",
     val type: String = "",
     val price: String = "",
