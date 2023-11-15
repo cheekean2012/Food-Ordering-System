@@ -116,15 +116,27 @@ class ConnectionBluetoothManager private constructor() {
             return bluetoothSocket?.isConnected == true
         }
 
-        fun printQRDataForCustomer(data: ByteArray) {
+        fun printQRDataForCustomer(qrCode: ByteArray, textData: ByteArray, tableData: ByteArray) {
             try {
                 if (outputStream != null) {
-                    outputStream?.write(data)
-                    val feedPaperCut = byteArrayOf(0x10, 0x56, 66, 0x00)
-                    outputStream!!.write(feedPaperCut)
+                    val alignmentCommand = byteArrayOf(0x1B, 0x61, 0x01)
+                    val desiredPaperFeedInMM = 30.0
+                    val lineSpacing = (desiredPaperFeedInMM / 0.176).toInt()
+                    val feedPaperCommand = byteArrayOf(0x1B, 0x4A, lineSpacing.toByte())
+                    val seDefaultFontSizeCommand = byteArrayOf(0x1B, 0x21, 0x01)
+                    val setFontSizeCommand = byteArrayOf(0x1B, 0x21, 0x04)
+
+                    outputStream!!.write(alignmentCommand)
+                    outputStream!!.write(setFontSizeCommand)
+                    outputStream!!.write(tableData)
+                    outputStream?.write(qrCode)
+                    outputStream!!.write(seDefaultFontSizeCommand)
+                    outputStream!!.write(textData)
+                    //val feedPaperCut = byteArrayOf(0x10, 0x56, 66, 0x00)
+                    outputStream!!.write(feedPaperCommand)
                     outputStream!!.flush()
                     // Add any additional print logic as needed
-                    Log.d("QR Code Data", data.contentToString())
+                    Log.d("QR Code Data", qrCode.contentToString())
                 }
             } catch (e: IOException) {
                 e.printStackTrace()

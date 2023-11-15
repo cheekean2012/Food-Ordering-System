@@ -161,14 +161,19 @@ class TableCustomerOrderFragment: Fragment() {
         }
     }
 
-    private fun print(qrCode: Bitmap, startTime: String, expirationTime: String) {
+    private fun print(
+        qrCode: Bitmap,
+        startTime: String,
+        expirationTime: String,
+        formattedTableNumber: String
+    ) {
         val handler = Handler(Looper.getMainLooper())
 
         if (checkBluetoothConnectionStatus()) {
             // Bluetooth is connected, introduce a delay before printing
             handler.postDelayed({
                 // Print the QR code
-                sendPrintData(qrCode, startTime, expirationTime)
+                sendPrintData(qrCode, startTime, expirationTime, formattedTableNumber)
             }, 1000) // Introduce a 1-second delay (adjust as needed)
         } else {
             // Bluetooth is not connected, handle
@@ -177,10 +182,15 @@ class TableCustomerOrderFragment: Fragment() {
         }
     }
 
-    private fun sendPrintData(qrCode: Bitmap, startTime: String, expirationTime: String) {
+    private fun sendPrintData(
+        qrCode: Bitmap,
+        startTime: String,
+        expirationTime: String,
+        formattedTableNumber: String
+    ) {
         // Convert the Bitmap to a byte array
 //        val qrCodeData = convertBitmapToByteArray(qrCode)
-        // Assume qrCodeBitmap is your QR code bitmap
+
         printPic.init(qrCode)
         val qrCodeData = printPic.printDraw()
 
@@ -190,8 +200,6 @@ class TableCustomerOrderFragment: Fragment() {
         // Generate empty lines below the title
         val emptyLines = "\r\n".repeat(emptyLinesBelowTitle)
 
-        val customEmptySpace = "         ".toByteArray(Charset.forName("UTF-8"))
-
         val paddingText1 = maxOf(0, (maxLength - startTime.length) / 2)
         val centerStartText = " ".repeat(paddingText1) + startTime
 
@@ -199,21 +207,22 @@ class TableCustomerOrderFragment: Fragment() {
         val centerExpireText = " ".repeat(paddingText2) + expirationTime
 
         // Create a ByteArray for the text data
-        val textData = "\n\n${centerStartText}${emptyLines}${centerExpireText}${emptyLines}\n\n\n".toByteArray(Charset.forName("UTF-8"))
+        val tableData = "${emptyLines}${formattedTableNumber}\n\n".toByteArray(Charset.forName("UTF-8"))
+        val timeData = "\n\n${centerStartText}${emptyLines}${centerExpireText}${emptyLines}\n\n\n".toByteArray(Charset.forName("UTF-8"))
 
         Log.d("QR Code Data", qrCodeData.contentToString())
-        Log.d("Text Data", textData.contentToString())
+        Log.d("Text Data", timeData.contentToString())
 
         // Combine the QR code data and text data
-        val printData = ByteArray( qrCodeData.size + textData.size)
-        System.arraycopy(qrCodeData, 0, printData, 0, qrCodeData.size)
-        System.arraycopy(textData, 0, printData, qrCodeData.size, textData.size)
+//        val printData = ByteArray( qrCodeData.size + timeData.size)
+//        System.arraycopy(qrCodeData, 0, printData, 0, qrCodeData.size)
+//        System.arraycopy(timeData, 0, printData, qrCodeData.size, timeData.size)
 
 
         // Check if your Bluetooth connection is still valid
         if (checkBluetoothConnectionStatus()) {
             // Send the print data to the printer
-            ConnectionBluetoothManager.printQRDataForCustomer(printData)
+            ConnectionBluetoothManager.printQRDataForCustomer(qrCodeData, timeData, tableData)
         } else {
             // Handle the case where the Bluetooth connection is lost
             Toast.makeText(requireContext(), "Bluetooth connection lost", Toast.LENGTH_SHORT).show()
@@ -260,6 +269,7 @@ class TableCustomerOrderFragment: Fragment() {
                 qrImage.setImageBitmap(qrCode)
 
 
+                val formattedTableNumber = "Table: ${tableViewModel.tableNumber.value.toString()}"
                 val formattedStartTime = "Start Date: $startTime"
                 val formattedExpireTime = "Expire Date: $expirationTime"
                 startTextView.text = formattedStartTime
@@ -273,7 +283,7 @@ class TableCustomerOrderFragment: Fragment() {
                 minuteTextView.isVisible = false
 
                 // Print the QR code, start date, and expire date
-                print(qrCode!!, formattedStartTime, formattedExpireTime)
+                print(qrCode!!, formattedStartTime, formattedExpireTime, formattedTableNumber)
             } else {
                 Toast.makeText(requireContext(), "Please enter the time", Toast.LENGTH_SHORT).show()
             }
@@ -285,8 +295,8 @@ class TableCustomerOrderFragment: Fragment() {
     }
 
     private fun generateQRCode(data: String): Bitmap? {
-        val width = 400
-        val height = 400
+        val width = 300
+        val height = 300
         val hints = EnumMap<EncodeHintType, Any>(EncodeHintType::class.java)
 
         hints[EncodeHintType.MARGIN] = 0
