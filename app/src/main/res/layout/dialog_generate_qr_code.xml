@@ -27,13 +27,22 @@
             app:layout_constraintBottom_toTopOf="@id/qr_code_expire_hour_field"/>
 
         <TextView
-            android:id="@+id/expire_view"
+            android:id="@+id/start_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingVertical="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/qr_image"/>
+
+        <TextView
+            android:id="@+id/expire_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingVertical="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/start_view"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/qr_code_expire_hour_field"

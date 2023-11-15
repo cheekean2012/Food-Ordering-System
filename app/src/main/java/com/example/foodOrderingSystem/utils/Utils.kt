@@ -15,4 +15,5 @@ class Utils: Fragment() {
     fun goToNextNavigate(fragment: Fragment, navItemId: Int) {
         fragment.findNavController().navigate(navItemId)
     }
+
 }
