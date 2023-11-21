@@ -18,6 +18,11 @@
             android:id="@+id/print_receipt"
             android:icon="@drawable/ic_printer_receipt"
             android:title="@string/print_receipt" />
+
+        <item
+            android:id="@+id/cancel_order"
+            android:icon="@drawable/ic_cancel_order"
+            android:title="Cancel Order" />
     </group>
 
 </menu>

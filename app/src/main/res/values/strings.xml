@@ -15,8 +15,10 @@
     <string name="expire_minute">Expire Minute</string>
     <string name="delete_menu_type">Delete Menu Type</string>
     <string name="delete_menu_item">Delete Menu Item</string>
+    <string name="delete_order_item">Delete Order Item</string>
     <string name="confirm_delete_menu_type">Are you sure want to delete it?</string>
     <string name="confirm_delete_menu_item">Are you sure want to delete it?</string>
+    <string name="confirm_delete_order_item">Are you sure want to delete it?</string>
     <string name="rm">RM</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -29,4 +31,6 @@
     <string name="food_item_price">Food Item Price</string>
     <string name="food_item_ingredient">Food Item Ingredient</string>
     <string name="loading">Loading</string>
+    <string name="cancel_reason">Cancel Reason</string>
+    <string name="enter_cancel_reason">Enter Cancel Reason</string>
 </resources>

@@ -22,6 +22,10 @@ class TableViewModel : ViewModel() {
         _tableList.value = ArrayList()
     }
 
+    fun setTable(table: MutableList<Tables>) {
+        _tableList.value = table
+    }
+
     fun addTable(table: Tables) {
         _tableList.value!!.add(table)
     }

@@ -1,17 +1,14 @@
 package com.example.foodOrderingSystem.ui.table
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,12 +17,9 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.ListView
-import android.widget.SimpleAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
@@ -34,28 +28,43 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.foodOrderingSystem.ConnectionBluetoothManager
-import com.example.foodOrderingSystem.ConnectionClass
 import com.example.foodOrderingSystem.PrintPic
 import com.example.foodOrderingSystem.R
+import com.example.foodOrderingSystem.adapters.OrderItemListAdapter
 import com.example.foodOrderingSystem.databinding.FragmentTableCustomerOrderBinding
+import com.example.foodOrderingSystem.firestore.Firestore
+import com.example.foodOrderingSystem.models.MenuTypeViewModel
+import com.example.foodOrderingSystem.models.OrderItem
+import com.example.foodOrderingSystem.models.OrderItemViewModel
+import com.example.foodOrderingSystem.models.TableOrder
 import com.example.foodOrderingSystem.models.TableViewModel
+import com.example.foodOrderingSystem.utils.Constants
 import com.example.foodOrderingSystem.utils.Utils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.divider.MaterialDivider
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.EnumMap
 import java.util.Locale
 import java.util.UUID
+import kotlin.math.ceil
 
 class TableCustomerOrderFragment: Fragment() {
 
@@ -73,12 +82,15 @@ class TableCustomerOrderFragment: Fragment() {
     private lateinit var dialog: Dialog
     private lateinit var mProgressDialog: Dialog
     val printPic = PrintPic.getInstance()
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var orderItemList: LiveData<MutableList<OrderItem>?>
+    private val orderItemViewModel: OrderItemViewModel by activityViewModels()
+    private val menuTypeViewModel: MenuTypeViewModel by activityViewModels()
     private val tableViewModel: TableViewModel by activityViewModels()
 
     @Volatile
     var stopWorker = false
     private var value = ""
-    private var connectionClass: ConnectionClass = ConnectionClass()
     private val outputStreamLock = Any()
 
     private val bluetoothPermissionLauncher = registerForActivityResult(
@@ -92,7 +104,7 @@ class TableCustomerOrderFragment: Fragment() {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 btActivityResultLauncher.launch(enableBtIntent)
             } else {
-                btScan()
+//                btScan()
             }
         }
 
@@ -102,7 +114,7 @@ class TableCustomerOrderFragment: Fragment() {
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
-            btScan()
+//            btScan()
         }
 
     }
@@ -122,6 +134,21 @@ class TableCustomerOrderFragment: Fragment() {
         // Initialize Bluetooth when the fragment is created
         ConnectionBluetoothManager.getInstance()
 
+        orderItemList = orderItemViewModel.orderItemList
+
+        recyclerView = binding.orderItemRecycleView
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        // Observe changes in the tableList LiveData
+        orderItemList.observe(viewLifecycleOwner) {
+            // Update your RecyclerView adapter when the LiveData changes
+            recyclerView.adapter = OrderItemListAdapter(this, requireContext(), orderItemList)
+        }
+
+        val tableId = tableViewModel.tableId.value.toString()
+
+        // Get data from firebase
+        Firestore().getCustomerOrder(this, recyclerView, orderItemViewModel, tableId)
 
         binding.apply{
             topAppBar.setNavigationOnClickListener { backToPrevious() }
@@ -135,6 +162,29 @@ class TableCustomerOrderFragment: Fragment() {
                 drawerLayout.open()
             }
             tableNavView.setNavigationItemSelectedListener { navDrawerNavigation(it) }
+
+            paymentButton.setOnClickListener { openDialogPayment() }
+
+            orderItemViewModel.subTotalPrice.observe(viewLifecycleOwner) { subTotalPrice ->
+                // Convert to Double and update UI with subTotalPrice
+                subTotalPriceTextView.text = String.format("%.2f", subTotalPrice!!.toDoubleOrNull() ?: 0.0)
+            }
+
+            orderItemViewModel.serviceCharge.observe(viewLifecycleOwner) { serviceCharge ->
+                // Convert to Double and update UI with serviceCharge
+                serviceChargePriceTextView.text = String.format("%.2f", serviceCharge!!.toDoubleOrNull() ?: 0.0)
+            }
+
+            orderItemViewModel.roundup.observe(viewLifecycleOwner) { roundup ->
+                // Convert to Double and update UI with roundup
+                roundUpPriceTextView.text = String.format("%.2f", roundup!!.toDoubleOrNull() ?: 0.0)
+            }
+
+            orderItemViewModel.finalTotal.observe(viewLifecycleOwner) { finalTotal ->
+                // Convert to Double and update UI with finalTotal
+                finalTotalPriceTextView.text = String.format("%.2f", finalTotal!!.toDoubleOrNull() ?: 0.0)
+            }
+
         }
     }
 
@@ -154,6 +204,13 @@ class TableCustomerOrderFragment: Fragment() {
 
             R.id.print_receipt -> {
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
+                checkPrintReceipt()
+                true
+            }
+
+            R.id.cancel_order -> {
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+                openCancelDialog()
                 true
             }
 
@@ -161,24 +218,319 @@ class TableCustomerOrderFragment: Fragment() {
         }
     }
 
+    private fun openDialogPayment() {
+        val inflater = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_payment_selection, null)
+
+        val ePayment: TextView = inflater.findViewById(R.id.e_wallet_textview)
+        val cashPayment: TextView = inflater.findViewById(R.id.cash_textview)
+        val divider: MaterialDivider = inflater.findViewById(R.id.divider)
+        val changeTextView: TextView = inflater.findViewById(R.id.display_change_textView)
+        val cashInputLayout: TextInputLayout = inflater.findViewById(R.id.cash_enter_textField)
+        val cashEditText: EditText = inflater.findViewById(R.id.cash_enter_editText)
+        val cashButton: Button = inflater.findViewById(R.id.cash_button)
+
+        val tableId = tableViewModel.tableId.value.toString()
+
+        var dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(inflater)
+            .show()
+
+        ePayment.setOnClickListener {
+            Firestore().updateCustomerPaymentMethod(this, tableId, Constants.EPAYMENT)
+            binding.paymentButton.visibility = View.GONE
+            dialog.dismiss()
+        }
+
+        cashPayment.setOnClickListener {
+            ePayment.visibility = View.INVISIBLE
+            cashPayment.visibility = View.INVISIBLE
+            divider.visibility = View.INVISIBLE
+            cashInputLayout.visibility = View.VISIBLE
+            cashButton.visibility = View.VISIBLE
+
+            cashButton.setOnClickListener {
+                val cashString = cashEditText.text.toString()
+
+                if (cashString.isNotEmpty()) {
+                    val cash = cashString.toDouble()
+                    val total = orderItemViewModel.finalTotal.value?.toDouble()
+
+                    if (cash >= total!!) {
+                        val change = cash - total
+                        changeTextView.text = "Change: RM" + String.format("%.2f", change)
+                        changeTextView.visibility = View.VISIBLE
+                        cashButton.visibility = View.GONE
+
+                        binding.paymentButton.visibility = View.GONE
+
+                        Firestore().updateCustomerPaymentMethod(this, tableId, Constants.CASHPAYMENT)
+                    } else {
+                        Toast.makeText(requireContext(), "The cash was not enough", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Please enter the value", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+        }
+    }
+
+    private fun openCancelDialog() {
+        val inflater = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_cancel_reason, null)
+
+        val cancelEditText: EditText = inflater.findViewById(R.id.cancel_editText)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setView(inflater)
+            .setNegativeButton("CANCEL") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton("OK") { dialog, _ ->
+                val cancelReason = cancelEditText.text.toString()
+
+                if (cancelReason.isNotEmpty()) {
+                    val tableId = tableViewModel.tableId.value.toString()
+                    dialog.dismiss()
+                    Firestore().updateTableCancelReason(this, tableId, cancelReason)
+                } else {
+                    Toast.makeText(requireContext(), "Please enter the reason", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .show()
+    }
+
+    private fun openDialogQrCode() {
+        val inflater = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_generate_qr_code, null)
+
+        val startTextView: TextView = inflater.findViewById(R.id.start_view)
+        startTextView.isVisible = false
+        val expireTextView: TextView = inflater.findViewById(R.id.expire_view)
+        expireTextView.isVisible = false
+        val qrImage: ImageView = inflater.findViewById(R.id.qr_image)
+        val hourEditText: EditText = inflater.findViewById(R.id.qr_code_expire_hour_edit_text)
+        val minuteEditText: EditText = inflater.findViewById(R.id.qr_code_expire_minute_edit_text)
+        val qrGenerateButton: Button = inflater.findViewById(R.id.generate_qr_code_button)
+
+        qrGenerateButton.setOnClickListener {
+            val baseUrl = "foodorderingsystem-a59e8.firebaseapp.com"
+            val tableNumber = tableViewModel.tableNumber.value.toString()
+            val hourString = hourEditText.text.toString()
+            val minuteString = minuteEditText.text.toString()
+            val uniqueToken = UUID.randomUUID().toString()
+
+            if (hourString.isNotEmpty() && minuteString.isNotEmpty()) {
+                val calendar = Calendar.getInstance()
+                calendar.timeInMillis = System.currentTimeMillis()
+                val sdf = SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault())
+                val startTime = sdf.format(calendar.time)
+
+                val (formattedExpirationTime, expirationTime) = calculateExpirationTime(hourString.toInt(), minuteString.toInt())
+                val expirationTimestamp = expirationTime.time / 1000
+
+                // Generate the QR code with the modified URL
+                val qrCode = generateQRCode("$baseUrl?tableNumber=$tableNumber&token=$uniqueToken&expTime=$expirationTimestamp")
+
+                // Display the QR code in an ImageView
+                qrImage.setImageBitmap(qrCode)
+
+
+                val formattedTableNumber = "Table: ${tableViewModel.tableNumber.value.toString()}"
+                val formattedStartTime = "Start Date: $startTime"
+                val formattedExpireTime = "Expire Date: $formattedExpirationTime"
+                startTextView.text = formattedStartTime
+                startTextView.isVisible = true
+                expireTextView.text = formattedExpireTime
+                expireTextView.isVisible = true
+
+                val hourTextView: TextInputLayout  = inflater.findViewById(R.id.qr_code_expire_hour_field)
+                val minuteTextView: TextInputLayout = inflater.findViewById(R.id.qr_code_expire_minute_field)
+                hourTextView.isVisible = false
+                minuteTextView.isVisible = false
+
+                // Print the QR code, start date, and expire date
+                //print(qrCode!!, formattedStartTime, formattedExpireTime, formattedTableNumber, uniqueToken, startTime, formattedExpirationTime)
+            } else {
+                Toast.makeText(requireContext(), "Please enter the time", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setView(inflater)
+            .show()
+    }
+
+    private fun checkPrintReceipt() {
+        if (checkBluetoothConnectionStatus()) {
+            // Bluetooth is connected, introduce a delay before printing
+            printReceipt()
+        } else {
+            // Bluetooth is not connected, handle
+            Toast.makeText(requireContext(), "Bluetooth is not connected", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun printReceipt() {
+        try {
+            val tableFragment = this // Assuming you're calling this from a Fragment
+            var tableNumber: String? = null
+            var id: String? = null
+            var tempOrderedItems: List<OrderItem>? = emptyList()
+            var orderReceipt: String? = null
+            val tableId = tableViewModel.tableId.value.toString()
+
+            // Call the function to retrieve customer ordering data
+            Firestore().getCustomerOrderForReceipt(tableFragment, tableId) { orderItems ->
+                // Check if the orderItems is not null
+                if (orderItems != null) {
+                    for (orderItem in orderItems) {
+                        id = orderItem.id
+                        tableNumber = orderItem.tableNumber
+                        tempOrderedItems = orderItem.customerOrder?.toList()
+                        Log.d("print receipt", tempOrderedItems.toString())
+
+                    }
+
+                    if (tempOrderedItems != null && tableNumber != null) {
+                        orderReceipt = generateReceipt(tempOrderedItems, tableNumber)
+                        Log.d("get order receipt", orderReceipt.toString())
+                    } else {
+                        Log.d("printOrder", "customerOrdering or tableNumber is null")
+                    }
+
+                    if (orderReceipt != null) {
+                        // Inside your Fragment/Activity
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            intentPrint(orderReceipt!!)
+                        }
+                    }
+
+                } else {
+                    Log.d("printOrder", "Order items are null")
+                }
+            }
+        } catch (ex: java.lang.Exception) {
+            value += "$ex\nExcep IntentPrint \n"
+            Toast.makeText(requireContext(), value, Toast.LENGTH_LONG).show()
+            Log.d("error printing", ex.toString())
+        }
+    }
+
+    private fun generateReceipt(orderItem: List<OrderItem>?, tableNumber: String?): String {
+        val maxLength = 32 // Adjust based on your printer's line width
+        val separatorLine = "-".repeat(maxLength)
+
+        val header = "Table: $tableNumber"
+        val emptyLine = "\r\n"
+        // Item name and quantity header
+        val itemDetails = buildString {
+            append(separatorLine)
+            append(emptyLine)
+
+            // Item name, quantity, and amount header
+            append("Item Name${" ".repeat(5)}Quantity${" ".repeat(4)}Amount$emptyLine")
+
+            var subTotal = 0.0
+            var totalQuantity = 0
+
+            for (item in orderItem.orEmpty()) {
+                // Item name on the left, quantity in the middle, amount on the right
+                val itemName = item.itemName
+                val quantity = item.quantity.toString()
+                val amount = item.totalPrice!!
+                subTotal += amount
+                totalQuantity += item.quantity!!
+
+                // Item name, quantity, and amount in a single line
+                val formattedLine = "%-${maxLength - 18}s %8s %8s".format(itemName, quantity, String.format("%.2f", amount))
+                append("$formattedLine$emptyLine")
+
+                // Remark and take away information
+                if (item.remarks?.isNotEmpty() == true) {
+                    append("Remark: ${item.remarks}$emptyLine")
+                }
+                if (item.takeaway == true) {
+                    append("Take Away$emptyLine")
+                }
+
+                append(emptyLine)
+            }
+
+            // Separator line between items and total calculation
+            append(emptyLine)
+
+            // Separator line between items
+            append(separatorLine)
+
+            // Display total quantity and sub-total
+            val totalQuantityLine = "Total Quantity: %-${maxLength - 19}s %s$emptyLine"
+            append(totalQuantityLine.format(" ", totalQuantity))
+
+            val subTotalLine = "Sub-Total: %-${maxLength - 18}s %.2f$emptyLine"
+            append(subTotalLine.format(" ", subTotal))
+
+            // Calculate service charge, round up, and final total
+            val serviceChargePercentage = 0.10 // 10%
+            val serviceCharge = subTotal * serviceChargePercentage
+            val beforeRoundup = subTotal + serviceCharge
+            val roundup = ceil(beforeRoundup) - beforeRoundup
+            val finalTotal = beforeRoundup + roundup
+
+            // Display service charge, round up, and final total
+            val serviceChargeLine = "Service Charge 10%%: %${maxLength - 21}.2f$emptyLine"
+            val roundupLine = "Round Up: %${maxLength - 11}.2f$emptyLine"
+            val finalTotalLine = "Final Total: %${maxLength - 14}.2f$emptyLine"
+
+            append(serviceChargeLine.format(serviceCharge))
+            append(roundupLine.format(roundup))
+            append(finalTotalLine.format(finalTotal))
+
+            append(emptyLine)
+            append(emptyLine)
+            append(separatorLine)
+        }
+
+        return "$header$emptyLine$itemDetails"
+    }
+
     private fun print(
         qrCode: Bitmap,
+        formattedStartTime: String,
+        formattedExpirationTime: String,
+        formattedTableNumber: String,
+        uniqueToken: String,
         startTime: String,
-        expirationTime: String,
-        formattedTableNumber: String
+        expirationTime: String
     ) {
         val handler = Handler(Looper.getMainLooper())
 
         if (checkBluetoothConnectionStatus()) {
             // Bluetooth is connected, introduce a delay before printing
             handler.postDelayed({
+
+                var tableOrder = TableOrder(
+                    tableViewModel.tableId.value.toString(),
+                    startTime,
+                    expirationTime,
+                    tableViewModel.tableNumber.value.toString(),
+                    null,
+                    null,
+                    "PROCESS",
+                    "",
+                    "",
+                    uniqueToken
+                )
+                //Firestore().addTableOrder(this, requireContext(), tableOrder)
                 // Print the QR code
-                sendPrintData(qrCode, startTime, expirationTime, formattedTableNumber)
+
             }, 1000) // Introduce a 1-second delay (adjust as needed)
+            sendPrintData(qrCode, formattedStartTime, formattedExpirationTime, formattedTableNumber)
         } else {
             // Bluetooth is not connected, handle
             Toast.makeText(requireContext(), "Bluetooth is not connected", Toast.LENGTH_SHORT).show()
-            checkPermission()
+//            checkPermission()
         }
     }
 
@@ -235,65 +587,6 @@ class TableCustomerOrderFragment: Fragment() {
         return stream.toByteArray()
     }
 
-    private fun openDialogQrCode() {
-        val inflater = LayoutInflater.from(requireContext())
-            .inflate(R.layout.dialog_generate_qr_code, null)
-
-        val startTextView: TextView = inflater.findViewById(R.id.start_view)
-        startTextView.isVisible = false
-        val expireTextView: TextView = inflater.findViewById(R.id.expire_view)
-        expireTextView.isVisible = false
-        val qrImage: ImageView = inflater.findViewById(R.id.qr_image)
-        val hourEditText: EditText = inflater.findViewById(R.id.qr_code_expire_hour_edit_text)
-        val minuteEditText: EditText = inflater.findViewById(R.id.qr_code_expire_minute_edit_text)
-        val qrGenerateButton: Button = inflater.findViewById(R.id.generate_qr_code_button)
-
-        qrGenerateButton.setOnClickListener {
-            val baseUrl = "http://192.168.0.3:8080"
-            val tableNumber = tableViewModel.tableNumber.value.toString()
-            var hourString = hourEditText.text.toString()
-            var minuteString = minuteEditText.text.toString()
-
-            if (hourString.isNotEmpty() && minuteString.isNotEmpty()) {
-                val calendar = Calendar.getInstance()
-                calendar.timeInMillis = System.currentTimeMillis()
-                val sdf = SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault())
-                val startTime = sdf.format(calendar.time)
-
-                val expirationTime = calculateExpirationTime(hourString.toInt(), minuteString.toInt())
-
-                // Generate the QR code with the modified URL
-                val qrCode = generateQRCode("$baseUrl?tableNumber=$tableNumber")
-
-                // Display the QR code in an ImageView
-                qrImage.setImageBitmap(qrCode)
-
-
-                val formattedTableNumber = "Table: ${tableViewModel.tableNumber.value.toString()}"
-                val formattedStartTime = "Start Date: $startTime"
-                val formattedExpireTime = "Expire Date: $expirationTime"
-                startTextView.text = formattedStartTime
-                startTextView.isVisible = true
-                expireTextView.text = formattedExpireTime
-                expireTextView.isVisible = true
-
-                val hourTextView: TextInputLayout  = inflater.findViewById(R.id.qr_code_expire_hour_field)
-                val minuteTextView: TextInputLayout = inflater.findViewById(R.id.qr_code_expire_minute_field)
-                hourTextView.isVisible = false
-                minuteTextView.isVisible = false
-
-                // Print the QR code, start date, and expire date
-                print(qrCode!!, formattedStartTime, formattedExpireTime, formattedTableNumber)
-            } else {
-                Toast.makeText(requireContext(), "Please enter the time", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(inflater)
-            .show()
-    }
-
     private fun generateQRCode(data: String): Bitmap? {
         val width = 300
         val height = 300
@@ -316,7 +609,7 @@ class TableCustomerOrderFragment: Fragment() {
         return bitmap
     }
 
-    private fun calculateExpirationTime(hour: Int, minute: Int): String {
+    private fun calculateExpirationTime(hour: Int, minute: Int):  Pair<String, Date> {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
 
@@ -326,7 +619,54 @@ class TableCustomerOrderFragment: Fragment() {
 
         // Format the expiration time
         val sdf = SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault())
-        return sdf.format(calendar.time)
+        val formattedExpirationTime = sdf.format(calendar.time)
+
+        // Return the formatted string and the Date object representing the expiration time
+        return Pair(formattedExpirationTime, calendar.time)
+    }
+
+    fun intentPrint(textValue: String) {
+        var prName = ""
+        prName = ConnectionBluetoothManager.getPrinterName().toString()
+        if (prName.isNotEmpty()) {
+            val buffer = textValue.toByteArray()
+            val printHeader = byteArrayOf(0xAA.toByte(), 0x55, 2, 0)
+            printHeader[3] = buffer.size.toByte()
+            beginListenForData()
+            if (printHeader.size > 128) {
+                value += "\nValue is more than 128 size\n"
+                Toast.makeText(requireContext(), value, Toast.LENGTH_LONG).show()
+            } else {
+                try {
+                    if (socket != null && socket!!.isConnected) {
+                        Log.d("Print", "Entering intentPrint")
+                        synchronized(outputStreamLock) {
+                            Log.d("Print", "Inside synchronized block")
+                            try {
+                                val sp = byteArrayOf(0x1B, 0x40)
+                                outputStream!!.write(sp)
+                                outputStream!!.write(textValue.toByteArray())
+                                val feedPaperCut = byteArrayOf(0x10, 0x56, 66, 0x00)
+                                outputStream!!.write(feedPaperCut)
+                                outputStream!!.flush()
+                            } catch (e: IOException) {
+                                // Handle exceptions
+                                e.printStackTrace()
+                            }
+                        }
+                        Log.d("Print", "Exiting intentPrint")
+                    } else {
+                        // Handle case where the socket is not connected
+                        Log.e("Bluetooth", "Socket is not connected")
+                    }
+                } catch (ex: java.lang.Exception) {
+                    Log.e("Bluetooth Error Printing", "Error during printing", ex)
+                    Toast.makeText(requireContext(), "Please select printer again", Toast.LENGTH_LONG).show()
+                }
+            }
+        } else {
+            Log.d("printer name in class", ConnectionBluetoothManager.getPrinterName().toString())
+        }
     }
 
     // Function to check Bluetooth connection status
@@ -347,166 +687,6 @@ class TableCustomerOrderFragment: Fragment() {
                 Log.d("Bluetooth", "Bluetooth is not connected")
                 return false
             }
-        }
-    }
-
-    private fun checkPermission() {
-        bluetoothManager = requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-
-//        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
-
-        bluetoothAdapter = bluetoothManager?.adapter
-
-        if (bluetoothAdapter == null) {
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                bluetoothPermissionLauncher.launch(Manifest.permission.BLUETOOTH_CONNECT)
-            } else {
-                bluetoothPermissionLauncher.launch(Manifest.permission.BLUETOOTH_ADMIN)
-            }
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun btScan() {
-
-        bluetoothManager = requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-        bluetoothAdapter = bluetoothManager?.adapter
-
-        ConnectionBluetoothManager.setBluetoothAdapter(bluetoothAdapter)
-
-        Log.d("check bluetooth adapter", bluetoothAdapter!!.isEnabled.toString())
-        Log.d("check socket is connected", socket?.isConnected.toString())
-        Log.d("check socket is null or exist", socket.toString())
-
-        val inflater = LayoutInflater.from(requireContext())
-        val dialogView = inflater.inflate(R.layout.scan_bt, null)
-
-        val btlst = dialogView.findViewById<ListView>(R.id.bt_list)
-        val pairedDevices: Set<BluetoothDevice> = bluetoothAdapter?.bondedDevices as Set<BluetoothDevice>
-        val ADAhere: SimpleAdapter
-        var data: MutableList<Map<String?, Any?>?>? = null
-        data = ArrayList()
-
-        if (pairedDevices.isNotEmpty()) {
-            for (device in pairedDevices) {
-                val datanum: MutableMap<String?, Any?> = HashMap()
-                datanum["A"] = device.name
-                datanum["B"] = device.address
-                data.add(datanum)
-            }
-            val fromWhere = arrayOf("A")
-            val viewsWhere = intArrayOf(R.id.item_name)
-            ADAhere = SimpleAdapter(requireContext(), data, R.layout.list_bluetooth_item, fromWhere, viewsWhere)
-            btlst.adapter = ADAhere
-            ADAhere.notifyDataSetChanged()
-
-            btlst.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, position, l ->
-                val string = ADAhere.getItem(position) as HashMap<String, String>
-                val prnName = string["A"]
-                ConnectionBluetoothManager.setPrinterName(prnName.toString())
-
-                try {
-                    if (bluetoothAdapter != null) {
-                        if (!bluetoothAdapter!!.isEnabled) {
-                            val enableBluetooth = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                            btActivityResultLauncher.launch(enableBluetooth)
-                        }
-                    } else {
-                        Log.d("bluetoothAdapter", "Null")
-                    }
-
-                    Log.d("check socket status", socket.toString() +", "+ socket?.isConnected.toString())
-                    if (socket != null && socket!!.isConnected) {
-                        // Reuse the existing connected socket
-                        outputStream = socket!!.outputStream
-                        inputStream = socket!!.inputStream
-                        beginListenForData()
-                        return@OnItemClickListener
-                    }
-
-                    val pairedDevices = bluetoothAdapter?.bondedDevices
-
-                    Log.d("get pair device", pairedDevices.toString())
-                    if (pairedDevices != null) {
-                        if (pairedDevices.isNotEmpty()) {
-                            for (device in pairedDevices) {
-                                if (device.name == ConnectionBluetoothManager.getPrinterName()) {
-                                    bluetoothDevice = device
-                                    ConnectionBluetoothManager.setPrinterName(device.name)
-                                    ConnectionBluetoothManager.setBluetoothDevice(bluetoothDevice)
-                                    Log.d("get device name", bluetoothDevice.toString())
-                                    val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
-                                    val m = bluetoothDevice!!.javaClass.getMethod(
-                                        "createRfcommSocket", *arrayOf<Class<*>?>(
-                                            Int::class.javaPrimitiveType
-                                        )
-                                    )
-                                    disconnectBluetoothSocket()
-
-                                    // Show progress dialog before connecting
-                                    //showProgress()
-
-                                    Log.d("before run beginListenData", "Creating socket")
-                                    socket = m.invoke(bluetoothDevice, 1) as BluetoothSocket
-                                    Log.d("before run beginListenData", "Socket created, canceling discovery")
-                                    bluetoothAdapter?.cancelDiscovery()
-                                    Log.d("before run beginListenData", "Discovery canceled, connecting socket")
-                                    socket!!.connect()
-                                    Log.d("before run beginListenData", "Socket connected")
-                                    ConnectionBluetoothManager.setBluetoothSocket(socket)
-                                    outputStream = socket!!.outputStream
-                                    inputStream = socket!!.inputStream
-                                    ConnectionBluetoothManager.setOutputStream(outputStream)
-                                    ConnectionBluetoothManager.setInputStream(inputStream)
-                                    beginListenForData()
-
-//                                    // Introduce a delay before connecting
-//                                    Handler(Looper.getMainLooper()).postDelayed({
-//
-//
-//                                        // Close progress dialog after connecting
-//                                        closeProgress()
-//                                    }, 2000) // 2000 milliseconds delay
-                                    break
-                                }
-                            }
-                        } else {
-                            val value = "No Devices Found"
-                            Toast.makeText(requireContext(), value, Toast.LENGTH_SHORT).show()
-                            return@OnItemClickListener
-                        }
-                    }
-                } catch (ex: java.lang.Exception) {
-                    val value = "Bluetooth Printer Is Not Connected"
-                    Toast.makeText(requireContext(), value, Toast.LENGTH_SHORT).show()
-                    socket = null
-                    ConnectionBluetoothManager.setBluetoothSocket(socket)
-                } finally {
-                    dialog.dismiss()
-                }
-            }
-        } else {
-            val value = "No Devices Found"
-            Toast.makeText(requireContext(), value, Toast.LENGTH_SHORT).show()
-        }
-
-        dialog = MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogView)
-            .show()
-    }
-
-    // Disconnect Bluetooth socket
-    private fun disconnectBluetoothSocket() {
-        try {
-            if (socket != null && socket!!.isConnected) {
-                socket!!.close()
-                outputStream?.close()
-                inputStream?.close()
-                // Note: outputStream is automatically closed when the socket is closed
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
     }
 

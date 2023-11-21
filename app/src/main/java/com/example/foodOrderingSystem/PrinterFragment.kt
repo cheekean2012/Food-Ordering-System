@@ -57,7 +57,6 @@ class PrinterFragment : Fragment() {
     @Volatile
     var stopWorker = false
     private var value = ""
-    private var connectionClass:ConnectionClass = ConnectionClass()
     private val outputStreamLock = Any()
 
     private val bluetoothPermissionLauncher = registerForActivityResult(
@@ -224,30 +223,38 @@ class PrinterFragment : Fragment() {
                                         )
                                     )
                                     disconnectBluetoothSocket()
-
-                                    // Show progress dialog before connecting
+// Define a boolean flag to control the thread
+                                    var isConnectionThreadRunning = true
                                     showProgress()
 
-                                    // Introduce a delay before connecting
-                                    Handler(Looper.getMainLooper()).postDelayed({
-                                        Log.d("before run beginListenData", "Creating socket")
-                                        socket = m.invoke(bluetoothDevice, 1) as BluetoothSocket
-                                        Log.d("before run beginListenData", "Socket created, canceling discovery")
-                                        bluetoothAdapter?.cancelDiscovery()
-                                        Log.d("before run beginListenData", "Discovery canceled, connecting socket")
-                                        socket!!.connect()
-                                        Log.d("before run beginListenData", "Socket connected")
-                                        ConnectionBluetoothManager.setBluetoothSocket(socket)
-                                        outputStream = socket!!.outputStream
-                                        inputStream = socket!!.inputStream
-                                        ConnectionBluetoothManager.setOutputStream(outputStream)
-                                        ConnectionBluetoothManager.setInputStream(inputStream)
-                                        beginListenForData()
+                                    Thread {
+                                        Handler(Looper.getMainLooper()).postDelayed({
+                                            if (isConnectionThreadRunning) {
+                                                // Introduce a delay before connecting
+                                                try {
+                                                    socket = m.invoke(bluetoothDevice, 1) as BluetoothSocket
+                                                    bluetoothAdapter?.cancelDiscovery()
+                                                    socket!!.connect()
+                                                    Log.d("socket", "connected")
+                                                    ConnectionBluetoothManager.setBluetoothSocket(socket)
+                                                    outputStream = socket!!.outputStream
+                                                    inputStream = socket!!.inputStream
+                                                    ConnectionBluetoothManager.setOutputStream(outputStream)
+                                                    ConnectionBluetoothManager.setInputStream(inputStream)
+                                                    beginListenForData()
 
-                                        // Close progress dialog after connecting
-                                        closeProgress()
-                                    }, 2000) // 2000 milliseconds delay
-                                    break
+                                                    // Your UI update code
+                                                    Toast.makeText(requireContext(), "Successfully connected", Toast.LENGTH_SHORT).show()
+                                                } catch (e: IOException) {
+                                                    e.printStackTrace()
+                                                    // Handle connection error
+                                                } finally {
+                                                    closeProgress()
+                                                }
+                                            }
+                                        }, 3000) // 3000 milliseconds delay
+                                    }.start()
+
                                 }
                             }
                         } else {
@@ -525,7 +532,7 @@ class PrinterFragment : Fragment() {
             val selectedDevice = ConnectionBluetoothManager.getPrinterName()
             binding.printerEditText.setText(selectedDevice)
             Log.d("get reconnect device name", selectedDevice.toString())
-            Log.d("check bluetooth adapter onResume", ConnectionBluetoothManager.getBluetoothAdapter()!!.isEnabled.toString())
+            Log.d("check bluetooth adapter onResume", ConnectionBluetoothManager.getBluetoothAdapter()?.isEnabled.toString())
             Log.d("check adapter is exist onResume", ConnectionBluetoothManager.getBluetoothAdapter().toString())
             Log.d("check socket onResume", ConnectionBluetoothManager.getBluetoothSocket()?.inputStream.toString())
 

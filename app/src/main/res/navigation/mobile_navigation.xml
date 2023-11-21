@@ -90,7 +90,7 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_menu_item_detail"
-        android:name="com.example.foodOrderingSystem.MenuItemDetailFragment"
+        android:name="com.example.foodOrderingSystem.menu.MenuItemDetailFragment"
         android:label="MenuItemDetailFragment"
         tools:layout="@layout/fragment_menu_item_detail">
         <action

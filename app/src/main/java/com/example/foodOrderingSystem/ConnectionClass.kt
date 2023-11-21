@@ -120,11 +120,11 @@ class ConnectionBluetoothManager private constructor() {
             try {
                 if (outputStream != null) {
                     val alignmentCommand = byteArrayOf(0x1B, 0x61, 0x01)
-                    val desiredPaperFeedInMM = 30.0
+                    val desiredPaperFeedInMM = 20.0
                     val lineSpacing = (desiredPaperFeedInMM / 0.176).toInt()
                     val feedPaperCommand = byteArrayOf(0x1B, 0x4A, lineSpacing.toByte())
-                    val seDefaultFontSizeCommand = byteArrayOf(0x1B, 0x21, 0x01)
-                    val setFontSizeCommand = byteArrayOf(0x1B, 0x21, 0x04)
+                    val seDefaultFontSizeCommand = byteArrayOf(0x1B, 0x21, 0x04)
+                    val setFontSizeCommand = byteArrayOf(0x1B, 0x21, 0x15)
 
                     outputStream!!.write(alignmentCommand)
                     outputStream!!.write(setFontSizeCommand)

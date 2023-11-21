@@ -10,46 +10,160 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/topAppBarLayout"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:elevation="8dp"
-            android:fitsSystemWindows="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_height="match_parent">
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/topAppBar"
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/topAppBarLayout"
                 android:layout_width="match_parent"
-                android:elevation="0dp"
-                app:tint="?attr/colorOnSurface"
-                app:elevation="0dp"
-                android:background="?android:attr/windowBackground"
-                android:layout_height="?attr/actionBarSize"
-                app:navigationIcon="@drawable/ic_left_arrow">
+                android:layout_height="wrap_content"
+                android:elevation="8dp"
+                android:fitsSystemWindows="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/topAppBar"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:elevation="0dp"
+                    app:tint="?attr/colorOnSurface"
+                    app:elevation="0dp"
+                    android:background="?android:attr/windowBackground"
+                    android:layout_height="?attr/actionBarSize"
+                    app:navigationIcon="@drawable/ic_left_arrow">
 
-                    <ImageView
-                        android:id="@+id/burger_menu"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/ic_burger_menu"
-                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                        app:contentDescription="Burger Menu"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        <ImageView
+                            android:id="@+id/burger_menu"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/ic_burger_menu"
+                            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                            app:contentDescription="Burger Menu"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent" />
 
-            </com.google.android.material.appbar.MaterialToolbar>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </com.google.android.material.appbar.AppBarLayout>
+                </com.google.android.material.appbar.MaterialToolbar>
+
+            </com.google.android.material.appbar.AppBarLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/order_item_recycleView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginVertical="16dp"
+                android:padding="8dp"
+                app:layout_constraintTop_toBottomOf="@id/topAppBarLayout"
+                app:layout_constraintBottom_toTopOf="@id/sub_total_textView"
+                tools:listitem="@layout/list_order_item"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/sub_total_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sub-Total: "
+                android:padding="8dp"
+                android:layout_marginHorizontal="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/order_item_recycleView"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/sub_total_price_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00"
+                android:padding="8dp"
+                android:layout_marginHorizontal="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/order_item_recycleView"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/service_charge_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Service Charge 10%: "
+                android:padding="8dp"
+                android:layout_marginHorizontal="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sub_total_textView"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/service_charge_price_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00"
+                android:padding="8dp"
+                android:layout_marginHorizontal="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sub_total_textView"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/round_up_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Round Up: "
+                android:padding="8dp"
+                android:layout_marginHorizontal="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/service_charge_textView"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/round_up_price_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00"
+                android:padding="8dp"
+                android:layout_marginHorizontal="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/service_charge_textView"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/final_total_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Final Total: "
+                android:padding="8dp"
+                android:layout_marginHorizontal="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/round_up_textView"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/final_total_price_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00"
+                android:padding="8dp"
+                android:layout_marginHorizontal="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/round_up_textView"
+                app:layout_constraintBottom_toTopOf="@id/payment_button"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/payment_button"
+                android:text="Make Payment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.navigation.NavigationView
             android:id="@+id/table_nav_view"

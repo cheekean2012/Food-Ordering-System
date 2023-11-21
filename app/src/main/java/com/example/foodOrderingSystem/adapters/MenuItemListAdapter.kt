@@ -5,20 +5,10 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
-import androidx.constraintlayout.widget.ConstraintSet.Constraint
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -27,17 +17,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.foodOrderingSystem.R
 import com.example.foodOrderingSystem.databinding.ListMenuItemBinding
-import com.example.foodOrderingSystem.databinding.ListMenuTypeBinding
 import com.example.foodOrderingSystem.models.MenuItem
 import com.example.foodOrderingSystem.models.MenuItemViewModel
-import com.example.foodOrderingSystem.models.MenuType
-import com.example.foodOrderingSystem.models.MenuTypeViewModel
 import com.example.foodOrderingSystem.utils.Utils
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.switchmaterial.SwitchMaterial
 import java.text.DecimalFormat
-import java.text.NumberFormat
-import java.util.UUID
 
 class MenuItemListAdapter (
     private val activity: Fragment,
