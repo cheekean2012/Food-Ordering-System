@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodOrderingSystem.R
 import com.example.foodOrderingSystem.databinding.ListOrderItemBinding
@@ -18,17 +18,17 @@ import com.example.foodOrderingSystem.models.OrderItemViewModel
 import com.example.foodOrderingSystem.models.TableViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlin.math.ceil
-import kotlin.properties.Delegates
 
 class OrderItemListAdapter(
     private val activity: Fragment,
     private val context: Context,
-    private val orderItemList: LiveData<MutableList<OrderItem>?>
+    private val orderItemList: MutableLiveData<MutableList<OrderItem>>
 ): RecyclerView.Adapter<OrderItemListAdapter.ItemViewHolder>() {
 
     private val orderItemViewModel: OrderItemViewModel by activity.activityViewModels()
     private val tableViewModel: TableViewModel by activity.activityViewModels()
     private var subTotal : Double = 0.0
+    private var totalQuantity: Int = 0
     private val serviceChargePercentage = 0.10 // 10%
     private var serviceCharge: Double = 0.0
     private var beforeRoundup : Double = 0.0
@@ -38,12 +38,14 @@ class OrderItemListAdapter(
 
     inner class ItemViewHolder(val view: ListOrderItemBinding) : RecyclerView.ViewHolder(view.root) {
         var itemName = view.orderItemTextview
+        var quantity = view.quantityTextview
         var remark = view.remarksTextview
         var takeaway = view.takeawayTextview
         var deleteItem = view.deleteOrderItem
 
         init {
             deleteItem.setOnClickListener { openDeleteDialog() }
+            calculateTotals()
         }
 
         private fun openDeleteDialog() {
@@ -68,6 +70,29 @@ class OrderItemListAdapter(
                 }
                 .show()
         }
+
+        private fun calculateTotals() {
+            subTotal = 0.0
+            totalQuantity = 0
+
+            orderItemList.value?.forEach { item ->
+                if (item.totalPrice != null) {
+                    subTotal += item.totalPrice!!
+                    totalQuantity += item.quantity!!
+                }
+            }
+
+            serviceCharge = subTotal * serviceChargePercentage
+            beforeRoundup = subTotal + serviceCharge
+            roundup = roundup(subTotal, serviceChargePercentage) - beforeRoundup
+            finalTotal = beforeRoundup + roundup
+
+            orderItemViewModel.setSubTotalPrice(subTotal.toString())
+            orderItemViewModel.setTotalQuantity(totalQuantity.toString())
+            orderItemViewModel.setServiceCharge(serviceCharge.toString())
+            orderItemViewModel.setRoundup(roundup.toString())
+            orderItemViewModel.setFinalTotal(finalTotal.toString())
+        }
     }
 
     override fun onCreateViewHolder(
@@ -82,27 +107,46 @@ class OrderItemListAdapter(
     override fun onBindViewHolder(holder: OrderItemListAdapter.ItemViewHolder, position: Int) {
         val item = orderItemList.value!![position]
         holder.itemName.text = item.itemName
+        holder.quantity.text = "Quantity: " + item.quantity.toString()
         holder.remark.text = "Remark: "+ item.remarks
         holder.takeaway.text = if (item.takeaway!!) "Takeaway" else ""
 
-        if (item.totalPrice != null) {
-            subTotal += item.totalPrice!!
-            orderItemViewModel.setSubTotalPrice(subTotal.toString())
-
-            serviceCharge = subTotal * serviceChargePercentage
-            orderItemViewModel.setServiceCharge(serviceCharge.toString())
-
-            beforeRoundup = subTotal + serviceCharge
-
-            roundup = ceil(beforeRoundup) - beforeRoundup
-            orderItemViewModel.setRoundup(roundup.toString())
-
-            finalTotal = beforeRoundup + roundup
-            orderItemViewModel.setFinalTotal(finalTotal.toString())
-        }
+//        if (item.totalPrice != null) {
+//            subTotal += item.totalPrice!!
+//            orderItemViewModel.setSubTotalPrice(subTotal.toString())
+//
+//            totalQuantity += item.quantity!!
+//            orderItemViewModel.setTotalQuantity(totalQuantity.toString())
+//
+//            serviceCharge = subTotal * serviceChargePercentage
+//            orderItemViewModel.setServiceCharge(serviceCharge.toString())
+//
+//            beforeRoundup = subTotal + serviceCharge
+//
+//            roundup =  roundup(subTotal, serviceChargePercentage) - beforeRoundup
+//            orderItemViewModel.setRoundup(roundup.toString())
+//
+//            finalTotal = beforeRoundup + roundup
+//            orderItemViewModel.setFinalTotal(finalTotal.toString())
+//        }
 
         holder.remark.visibility = if (!TextUtils.isEmpty(holder.remark.text)) View.VISIBLE else View.INVISIBLE
         holder.takeaway.visibility = if (!TextUtils.isEmpty(holder.takeaway.text)) View.VISIBLE else View.INVISIBLE
+    }
+
+    private fun roundup(subTotal: Double, serviceChargePercentage: Double): Double {
+        val serviceCharge = subTotal * serviceChargePercentage
+        val beforeRoundup = subTotal + serviceCharge
+
+        val decimalValue = (beforeRoundup * 100).toInt() % 10
+
+        val roundedValue = if (decimalValue > 5) {
+            ceil(beforeRoundup)
+        } else {
+            beforeRoundup
+        }
+
+        return roundedValue
     }
 
     override fun getItemCount(): Int {

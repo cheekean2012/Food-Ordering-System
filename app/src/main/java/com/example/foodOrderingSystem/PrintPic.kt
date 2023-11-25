@@ -55,8 +55,6 @@ class PrintPic private constructor() {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-        } finally {
-            btm.recycle()
         }
     }
 

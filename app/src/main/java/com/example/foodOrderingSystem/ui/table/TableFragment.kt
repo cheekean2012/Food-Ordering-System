@@ -26,7 +26,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.foodOrderingSystem.ConnectionBluetoothManager
+import com.example.foodOrderingSystem.utils.ConnectionBluetoothManager
 import com.example.foodOrderingSystem.R
 import com.example.foodOrderingSystem.adapters.TableListAdapter
 import com.example.foodOrderingSystem.databinding.FragmentTableBinding
@@ -331,11 +331,8 @@ class TableFragment : Fragment() {
                         tableNumber
                     )
 
-                    var uniqueToken = UUID.randomUUID().toString()
-
                     var tableOrder = TableOrder(
                         uniqueID,
-                        "",
                         "",
                         tableNumber,
                         null,
@@ -343,7 +340,7 @@ class TableFragment : Fragment() {
                         "PROCESS",
                         "",
                         "",
-                        uniqueToken
+                        ""
                     )
 
                     // Add data into table view model

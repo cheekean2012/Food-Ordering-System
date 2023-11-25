@@ -55,6 +55,7 @@ class SettingsFragment : Fragment() {
             menuTypeTextview.setOnClickListener { goToNextPage(R.id.action_navigation_settings_to_menuTypeFragment) }
             menuItemTextview.setOnClickListener { goToNextPage(R.id.action_navigation_settings_to_menuItemListFragment) }
             printerTextview.setOnClickListener { goToNextPage(R.id.action_navigation_settings_to_navigation_printerFragment) }
+            reportTextview.setOnClickListener { goToNextPage(R.id.action_navigation_settings_to_reportFragment) }
         }
 
     }

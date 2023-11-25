@@ -28,20 +28,19 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.foodOrderingSystem.ConnectionBluetoothManager
+import com.example.foodOrderingSystem.utils.ConnectionBluetoothManager
 import com.example.foodOrderingSystem.PrintPic
 import com.example.foodOrderingSystem.R
 import com.example.foodOrderingSystem.adapters.OrderItemListAdapter
 import com.example.foodOrderingSystem.databinding.FragmentTableCustomerOrderBinding
 import com.example.foodOrderingSystem.firestore.Firestore
-import com.example.foodOrderingSystem.models.MenuTypeViewModel
 import com.example.foodOrderingSystem.models.OrderItem
 import com.example.foodOrderingSystem.models.OrderItemViewModel
-import com.example.foodOrderingSystem.models.TableOrder
+import com.example.foodOrderingSystem.models.Report
 import com.example.foodOrderingSystem.models.TableViewModel
 import com.example.foodOrderingSystem.utils.Constants
 import com.example.foodOrderingSystem.utils.Utils
@@ -58,9 +57,11 @@ import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.charset.Charset
+import java.sql.Timestamp
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
-import java.util.Date
 import java.util.EnumMap
 import java.util.Locale
 import java.util.UUID
@@ -83,9 +84,8 @@ class TableCustomerOrderFragment: Fragment() {
     private lateinit var mProgressDialog: Dialog
     val printPic = PrintPic.getInstance()
     private lateinit var recyclerView: RecyclerView
-    private lateinit var orderItemList: LiveData<MutableList<OrderItem>?>
+    private lateinit var orderItemList: MutableLiveData<MutableList<OrderItem>>
     private val orderItemViewModel: OrderItemViewModel by activityViewModels()
-    private val menuTypeViewModel: MenuTypeViewModel by activityViewModels()
     private val tableViewModel: TableViewModel by activityViewModels()
 
     @Volatile
@@ -156,7 +156,10 @@ class TableCustomerOrderFragment: Fragment() {
             val navigationView: NavigationView = binding.tableNavView
             val headerView: View = navigationView.getHeaderView(0)
             val tableNumberTextView: TextView = headerView.findViewById(R.id.table_header_number)
-            tableNumberTextView.text = tableViewModel.tableNumber.value.toString()
+            tableNumberTextView.text = buildString {
+                append("Table ")
+                append(tableViewModel.tableNumber.value.toString())
+            }
 
             burgerMenu.setOnClickListener {
                 drawerLayout.open()
@@ -164,6 +167,11 @@ class TableCustomerOrderFragment: Fragment() {
             tableNavView.setNavigationItemSelectedListener { navDrawerNavigation(it) }
 
             paymentButton.setOnClickListener { openDialogPayment() }
+
+//            tableViewModel.tableId.observe(viewLifecycleOwner) { tableId ->
+//                // Get data from firebase using the new tableId
+//                Firestore().getCustomerOrder(this@TableCustomerOrderFragment, recyclerView, orderItemViewModel, tableId.toString())
+//            }
 
             orderItemViewModel.subTotalPrice.observe(viewLifecycleOwner) { subTotalPrice ->
                 // Convert to Double and update UI with subTotalPrice
@@ -191,10 +199,10 @@ class TableCustomerOrderFragment: Fragment() {
     private fun navDrawerNavigation(menuItem: MenuItem): Boolean {
 
         return when (menuItem.itemId) {
-            R.id.add_food_item -> {
-    //                binding.drawerLayout.closeDrawer(GravityCompat.START)
-                true
-            }
+//            R.id.add_food_item -> {
+//    //                binding.drawerLayout.closeDrawer(GravityCompat.START)
+//                true
+//            }
 
             R.id.generate_qr_code -> {
 //                binding.drawerLayout.closeDrawer(GravityCompat.START)
@@ -230,7 +238,31 @@ class TableCustomerOrderFragment: Fragment() {
         val cashEditText: EditText = inflater.findViewById(R.id.cash_enter_editText)
         val cashButton: Button = inflater.findViewById(R.id.cash_button)
 
+        val id = UUID.randomUUID().toString()
         val tableId = tableViewModel.tableId.value.toString()
+        val tableNumber = tableViewModel.tableNumber.value.toString()
+
+        val itemList = orderItemViewModel.orderItemList.value
+        val serviceCharge = orderItemViewModel.serviceCharge.value.toString()
+        val totalQuantity = orderItemViewModel.totalQuantity.value.toString()
+        val subTotalPrice = orderItemViewModel.subTotalPrice.value.toString()
+        val finalTotal = orderItemViewModel.finalTotal.value.toString()
+
+        // Generating current timestamp
+//        val currentTimestamp: Timestamp = Timestamp(System.currentTimeMillis())
+        val currentTimestamp = Timestamp(System.currentTimeMillis())
+
+        // Using the toInstant() method to get an Instant and then extracting seconds
+        val unixTimestampSeconds = currentTimestamp.toInstant().epochSecond
+        println("Current Timestamp: $unixTimestampSeconds")
+
+        // Generating current date
+        val currentDate: LocalDateTime = LocalDateTime.now()
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/YYYY HH:mm:ss")
+        val formattedDate: String = currentDate.format(formatter)
+        println("Current Date: $formattedDate")
+
+        val timeStamp = com.google.firebase.Timestamp.now()
 
         var dialog = MaterialAlertDialogBuilder(requireContext())
             .setView(inflater)
@@ -238,6 +270,23 @@ class TableCustomerOrderFragment: Fragment() {
 
         ePayment.setOnClickListener {
             Firestore().updateCustomerPaymentMethod(this, tableId, Constants.EPAYMENT)
+
+            val report = Report (
+                id,
+                tableId,
+                tableNumber,
+                unixTimestampSeconds.toString(),
+                formattedDate,
+                totalQuantity,
+                finalTotal,
+                serviceCharge,
+                subTotalPrice,
+                itemList,
+                "COMPLETED",
+                timeStamp
+            )
+            Firestore().addReport(this, report)
+
             binding.paymentButton.visibility = View.GONE
             dialog.dismiss()
         }
@@ -265,6 +314,23 @@ class TableCustomerOrderFragment: Fragment() {
                         binding.paymentButton.visibility = View.GONE
 
                         Firestore().updateCustomerPaymentMethod(this, tableId, Constants.CASHPAYMENT)
+
+                        val report = Report (
+                            id,
+                            tableId,
+                            tableNumber,
+                            unixTimestampSeconds.toString(),
+                            formattedDate,
+                            totalQuantity,
+                            finalTotal,
+                            serviceCharge,
+                            subTotalPrice,
+                            itemList,
+                            "COMPLETED",
+                            timeStamp
+                        )
+                        Firestore().addReport(this, report)
+
                     } else {
                         Toast.makeText(requireContext(), "The cash was not enough", Toast.LENGTH_SHORT).show()
                     }
@@ -307,54 +373,33 @@ class TableCustomerOrderFragment: Fragment() {
 
         val startTextView: TextView = inflater.findViewById(R.id.start_view)
         startTextView.isVisible = false
-        val expireTextView: TextView = inflater.findViewById(R.id.expire_view)
-        expireTextView.isVisible = false
         val qrImage: ImageView = inflater.findViewById(R.id.qr_image)
-        val hourEditText: EditText = inflater.findViewById(R.id.qr_code_expire_hour_edit_text)
-        val minuteEditText: EditText = inflater.findViewById(R.id.qr_code_expire_minute_edit_text)
         val qrGenerateButton: Button = inflater.findViewById(R.id.generate_qr_code_button)
 
         qrGenerateButton.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = System.currentTimeMillis()
+            val sdf = SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault())
+            val startTime = sdf.format(calendar.time)
+
             val baseUrl = "foodorderingsystem-a59e8.firebaseapp.com"
             val tableNumber = tableViewModel.tableNumber.value.toString()
-            val hourString = hourEditText.text.toString()
-            val minuteString = minuteEditText.text.toString()
             val uniqueToken = UUID.randomUUID().toString()
 
-            if (hourString.isNotEmpty() && minuteString.isNotEmpty()) {
-                val calendar = Calendar.getInstance()
-                calendar.timeInMillis = System.currentTimeMillis()
-                val sdf = SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault())
-                val startTime = sdf.format(calendar.time)
 
-                val (formattedExpirationTime, expirationTime) = calculateExpirationTime(hourString.toInt(), minuteString.toInt())
-                val expirationTimestamp = expirationTime.time / 1000
+            // Generate the QR code with the modified URL
+            val qrCode = generateQRCode("$baseUrl?tableNumber=$tableNumber&token=$uniqueToken")
 
-                // Generate the QR code with the modified URL
-                val qrCode = generateQRCode("$baseUrl?tableNumber=$tableNumber&token=$uniqueToken&expTime=$expirationTimestamp")
+            // Display the QR code in an ImageView
+            qrImage.setImageBitmap(qrCode)
 
-                // Display the QR code in an ImageView
-                qrImage.setImageBitmap(qrCode)
+            val formattedTableNumber = "Table: ${tableViewModel.tableNumber.value.toString()}"
+            val formattedStartTime = "Start Date: $startTime"
+            startTextView.text = formattedStartTime
+            startTextView.isVisible = true
 
-
-                val formattedTableNumber = "Table: ${tableViewModel.tableNumber.value.toString()}"
-                val formattedStartTime = "Start Date: $startTime"
-                val formattedExpireTime = "Expire Date: $formattedExpirationTime"
-                startTextView.text = formattedStartTime
-                startTextView.isVisible = true
-                expireTextView.text = formattedExpireTime
-                expireTextView.isVisible = true
-
-                val hourTextView: TextInputLayout  = inflater.findViewById(R.id.qr_code_expire_hour_field)
-                val minuteTextView: TextInputLayout = inflater.findViewById(R.id.qr_code_expire_minute_field)
-                hourTextView.isVisible = false
-                minuteTextView.isVisible = false
-
-                // Print the QR code, start date, and expire date
-                //print(qrCode!!, formattedStartTime, formattedExpireTime, formattedTableNumber, uniqueToken, startTime, formattedExpirationTime)
-            } else {
-                Toast.makeText(requireContext(), "Please enter the time", Toast.LENGTH_SHORT).show()
-            }
+            // Print the QR code, start date, and expire date
+            print(qrCode!!, formattedStartTime, formattedTableNumber, uniqueToken, startTime)
         }
 
         MaterialAlertDialogBuilder(requireContext())
@@ -475,7 +520,7 @@ class TableCustomerOrderFragment: Fragment() {
             val serviceChargePercentage = 0.10 // 10%
             val serviceCharge = subTotal * serviceChargePercentage
             val beforeRoundup = subTotal + serviceCharge
-            val roundup = ceil(beforeRoundup) - beforeRoundup
+            val roundup = roundup(subTotal, serviceChargePercentage) - beforeRoundup
             val finalTotal = beforeRoundup + roundup
 
             // Display service charge, round up, and final total
@@ -495,14 +540,27 @@ class TableCustomerOrderFragment: Fragment() {
         return "$header$emptyLine$itemDetails"
     }
 
+    private fun roundup(subTotal: Double, serviceChargePercentage: Double): Double {
+        val serviceCharge = subTotal * serviceChargePercentage
+        val beforeRoundup = subTotal + serviceCharge
+
+        val decimalValue = (beforeRoundup * 100).toInt() % 10
+
+        val roundedValue = if (decimalValue > 5) {
+            ceil(beforeRoundup)
+        } else {
+            beforeRoundup
+        }
+
+        return roundedValue
+    }
+
     private fun print(
         qrCode: Bitmap,
         formattedStartTime: String,
-        formattedExpirationTime: String,
         formattedTableNumber: String,
         uniqueToken: String,
-        startTime: String,
-        expirationTime: String
+        startTime: String
     ) {
         val handler = Handler(Looper.getMainLooper())
 
@@ -510,23 +568,12 @@ class TableCustomerOrderFragment: Fragment() {
             // Bluetooth is connected, introduce a delay before printing
             handler.postDelayed({
 
-                var tableOrder = TableOrder(
-                    tableViewModel.tableId.value.toString(),
-                    startTime,
-                    expirationTime,
-                    tableViewModel.tableNumber.value.toString(),
-                    null,
-                    null,
-                    "PROCESS",
-                    "",
-                    "",
-                    uniqueToken
-                )
-                //Firestore().addTableOrder(this, requireContext(), tableOrder)
+                val tableId = tableViewModel.tableId.value.toString()
+                Firestore().updateTableOrder(this, tableId, startTime, uniqueToken)
                 // Print the QR code
 
             }, 1000) // Introduce a 1-second delay (adjust as needed)
-            sendPrintData(qrCode, formattedStartTime, formattedExpirationTime, formattedTableNumber)
+            sendPrintData(qrCode, formattedStartTime, formattedTableNumber)
         } else {
             // Bluetooth is not connected, handle
             Toast.makeText(requireContext(), "Bluetooth is not connected", Toast.LENGTH_SHORT).show()
@@ -537,7 +584,6 @@ class TableCustomerOrderFragment: Fragment() {
     private fun sendPrintData(
         qrCode: Bitmap,
         startTime: String,
-        expirationTime: String,
         formattedTableNumber: String
     ) {
         // Convert the Bitmap to a byte array
@@ -555,12 +601,9 @@ class TableCustomerOrderFragment: Fragment() {
         val paddingText1 = maxOf(0, (maxLength - startTime.length) / 2)
         val centerStartText = " ".repeat(paddingText1) + startTime
 
-        val paddingText2 = maxOf(0, (maxLength - expirationTime.length) / 2)
-        val centerExpireText = " ".repeat(paddingText2) + expirationTime
-
         // Create a ByteArray for the text data
         val tableData = "${emptyLines}${formattedTableNumber}\n\n".toByteArray(Charset.forName("UTF-8"))
-        val timeData = "\n\n${centerStartText}${emptyLines}${centerExpireText}${emptyLines}\n\n\n".toByteArray(Charset.forName("UTF-8"))
+        val timeData = "\n\n${centerStartText}${emptyLines}${emptyLines}\n\n\n".toByteArray(Charset.forName("UTF-8"))
 
         Log.d("QR Code Data", qrCodeData.contentToString())
         Log.d("Text Data", timeData.contentToString())
@@ -607,22 +650,6 @@ class TableCustomerOrderFragment: Fragment() {
         }
 
         return bitmap
-    }
-
-    private fun calculateExpirationTime(hour: Int, minute: Int):  Pair<String, Date> {
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = System.currentTimeMillis()
-
-        // Set the expiration time
-        calendar.add(Calendar.HOUR_OF_DAY, hour)
-        calendar.add(Calendar.MINUTE, minute)
-
-        // Format the expiration time
-        val sdf = SimpleDateFormat("dd/MM/YYYY HH:mm:ss", Locale.getDefault())
-        val formattedExpirationTime = sdf.format(calendar.time)
-
-        // Return the formatted string and the Date object representing the expiration time
-        return Pair(formattedExpirationTime, calendar.time)
     }
 
     fun intentPrint(textValue: String) {
@@ -833,5 +860,11 @@ class TableCustomerOrderFragment: Fragment() {
         super.onPause()
         // Disconnect Bluetooth when leaving the fragment
         ConnectionBluetoothManager.disconnectBluetooth()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+        orderItemViewModel.resetValue()
     }
 }

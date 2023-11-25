@@ -9,13 +9,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodOrderingSystem.R
-import com.example.foodOrderingSystem.menu.MenuItemDetailFragment
+import com.example.foodOrderingSystem.ui.menus.MenuItemDetailFragment
 import com.example.foodOrderingSystem.adapters.MenuItemListAdapter
 import com.example.foodOrderingSystem.adapters.MenuTypeListAdapter
 import com.example.foodOrderingSystem.adapters.OrderItemListAdapter
+import com.example.foodOrderingSystem.adapters.ReportDetailItemListAdapter
+import com.example.foodOrderingSystem.adapters.ReportListAdapter
 import com.example.foodOrderingSystem.adapters.TableListAdapter
-import com.example.foodOrderingSystem.menu.MenuItemListFragment
-import com.example.foodOrderingSystem.menu.MenuTypeFragment
+import com.example.foodOrderingSystem.ui.menus.MenuItemListFragment
+import com.example.foodOrderingSystem.ui.menus.MenuTypeFragment
 import com.example.foodOrderingSystem.models.MenuItem
 import com.example.foodOrderingSystem.models.MenuItemViewModel
 import com.example.foodOrderingSystem.models.MenuType
@@ -23,9 +25,13 @@ import com.example.foodOrderingSystem.models.MenuTypeViewModel
 import com.example.foodOrderingSystem.models.OrderItem
 import com.example.foodOrderingSystem.models.OrderItemViewModel
 import com.example.foodOrderingSystem.models.PrintOrderItem
+import com.example.foodOrderingSystem.models.Report
+import com.example.foodOrderingSystem.models.ReportItemViewModel
 import com.example.foodOrderingSystem.models.TableOrder
 import com.example.foodOrderingSystem.models.TableViewModel
 import com.example.foodOrderingSystem.models.Tables
+import com.example.foodOrderingSystem.ui.reports.ReportFragment
+import com.example.foodOrderingSystem.ui.reports.ReportItemFragment
 import com.example.foodOrderingSystem.ui.table.TableCustomerOrderFragment
 import com.example.foodOrderingSystem.ui.table.TableFragment
 import com.example.foodOrderingSystem.utils.Constants
@@ -206,6 +212,36 @@ class Firestore {
         }
     }
 
+    fun updateTableOrder(activity: Fragment, id: String, startTime: String, token: String) {
+        when(activity) {
+            is TableCustomerOrderFragment -> {
+                val documentRef = mFirestore.collection(Constants.TABLEORDERS).document(id)
+                Log.d("table id", id)
+
+                // Check if the start time exists in the document
+                documentRef.get()
+                    .addOnSuccessListener { documentSnapshot ->
+                        if (documentSnapshot.exists()) {
+                            // Document exists, now check if the start time exists
+                            val existingStartTime = documentSnapshot.getString("startTime")
+
+                            if (existingStartTime == "") {
+                                // Start time doesn't exist, update the document
+                                documentRef.update(mapOf(
+                                    "startTime" to startTime,
+                                    "token" to token
+                                ))
+                            } else {
+                                documentRef.update(mapOf(
+                                    "token" to token
+                                ))
+                            }
+                        }
+                    }
+            }
+        }
+    }
+
     fun updateTableCancelReason(activity: Fragment, id: String, cancelReason: String) {
         when(activity) {
             is TableCustomerOrderFragment -> {
@@ -252,32 +288,37 @@ class Firestore {
         activity: Fragment,
         recyclerView: RecyclerView,
         orderItemViewModel: OrderItemViewModel,
-        tableId: String
+        id: String
     ) {
-        mFirestore.collection(Constants.TABLEORDERS)
-            .document(tableId)
-            .get()
-            .addOnSuccessListener { result ->
+        when (activity) {
+            is TableCustomerOrderFragment -> {
+                mFirestore.collection(Constants.TABLEORDERS)
+                    .document(id)
+                    .get()
+                    .addOnSuccessListener { result ->
 
-                if (result.exists()) {
-                    val customerOrderItem = result.toObject(PrintOrderItem::class.java)?.customerOrder
-                    if (customerOrderItem != null) {
-                        orderItemViewModel.setOrderItem(customerOrderItem)
+                        Log.d("id", id)
+                        if (result.exists()) {
+                            val customerOrderItem = result.toObject(PrintOrderItem::class.java)?.customerOrder
+                            if (customerOrderItem != null) {
+                                orderItemViewModel.setOrderItem(customerOrderItem)
 
-                        // Create LiveData to observe changes
-                        val orderItemLiveData = MutableLiveData<MutableList<OrderItem>>()
-                        orderItemLiveData.value = (customerOrderItem)
+                                // Create LiveData to observe changes
+                                val orderItemLiveData = MutableLiveData<MutableList<OrderItem>>()
+                                orderItemLiveData.value = (customerOrderItem)
 
-                        Log.d("load order item", customerOrderItem.toString())
+                                Log.d("load order item", customerOrderItem.toString())
 
-                        recyclerView.adapter = OrderItemListAdapter(activity, activity.requireContext(), orderItemLiveData)
-                    } else {
-                        Log.e("Firestore", "Document $tableId does not exist")
+                                recyclerView.adapter = OrderItemListAdapter(activity, activity.requireContext(), orderItemLiveData)
+                            } else {
+                                Log.e("Firestore", "Document $id does not exist")
+                            }
+                        } else {
+                            Log.e("Firestore", "Document $id does not exist")
+                        }
                     }
-                } else {
-                    Log.e("Firestore", "Document $tableId does not exist")
-                }
             }
+        }
     }
 
     fun getCustomerOrderForReceipt(
@@ -503,6 +544,85 @@ class Firestore {
         mFirestore.collection(Constants.MENUITEMS)
             .document(id!!)
             .delete()
+    }
+
+    fun addReport(activity: Fragment, report: Report) {
+        when (activity) {
+            is TableCustomerOrderFragment -> {
+                mFirestore.collection(Constants.REPORTS)
+                    .document(report.id!!)
+                    .set(report, SetOptions.merge())
+                    .addOnSuccessListener { documentReference ->
+                        Log.d(ContentValues.TAG, "DocumentSnapshot added with ID: $documentReference")
+                    }
+            }
+        }
+    }
+
+    fun getReport(
+        activity: Fragment,
+        context: Context,
+        recyclerView: RecyclerView,
+        reportItemViewModel: ReportItemViewModel, ) {
+        when (activity) {
+            is ReportFragment -> {
+                mFirestore.collection(Constants.REPORTS)
+                    .orderBy("dateTime", Query.Direction.DESCENDING)
+                    .get()
+                    .addOnSuccessListener { result ->
+
+                        /**
+                        Custom object to return the data field of the document in QuerySnapShot
+                        Adapter's MutableList can works in MutableList and ArrayList
+                        But if Adapter is ArrayList, it doesn't works MutableList
+                         */
+                        val reportItemList = result.toObjects(Report::class.java)
+                        reportItemViewModel.setReportItem(reportItemList)
+
+                        // Create LiveData to observe changes
+                        val reportItemLiveData = MutableLiveData<MutableList<Report>>()
+                        reportItemLiveData.value = reportItemList
+
+                        Log.d("load report", reportItemList.toString())
+
+                        recyclerView.adapter = ReportListAdapter(activity, context, reportItemLiveData)
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.d(ContentValues.TAG, "Error getting documents: ", exception)
+                    }
+            }
+        }
+    }
+
+    fun getCustomerReportItemDetail(
+        activity: Fragment,
+        recyclerView: RecyclerView,
+        reportId: String
+    ) {
+        mFirestore.collection(Constants.REPORTS)
+            .document(reportId)
+            .get()
+            .addOnSuccessListener { result ->
+
+                Log.d("id", reportId)
+                if (result.exists()) {
+                    val customerOrderItem = result.toObject(Report::class.java)?.orderItem
+                    if (customerOrderItem != null) {
+
+                        // Create LiveData to observe changes
+                        val reportItemLiveData = MutableLiveData<MutableList<OrderItem>>()
+                        reportItemLiveData.value = (customerOrderItem)
+
+                        Log.d("load order item", customerOrderItem.toString())
+
+                        recyclerView.adapter = ReportDetailItemListAdapter(activity, activity.requireContext(), reportItemLiveData)
+                    } else {
+                        Log.e("Firestore", "Document $reportId does not exist")
+                    }
+                } else {
+                    Log.e("Firestore", "Document $reportId does not exist")
+                }
+            }
     }
 
 }

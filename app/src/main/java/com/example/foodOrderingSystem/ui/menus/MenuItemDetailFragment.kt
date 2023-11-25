@@ -1,4 +1,4 @@
-package com.example.foodOrderingSystem.menu
+package com.example.foodOrderingSystem.ui.menus
 
 import android.Manifest
 import android.content.ActivityNotFoundException

@@ -57,18 +57,6 @@
                 app:layout_constraintTop_toBottomOf="@id/remarks_textview"
                 app:layout_constraintStart_toStartOf="parent" />
 
-
-            <ImageView
-                android:id="@+id/delete_order_item"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="8dp"
-                android:layout_marginHorizontal="16dp"
-                android:src="@drawable/ic_close"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="@id/order_item_textview"
-                app:layout_constraintTop_toTopOf="@id/order_item_textview"/>
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>

@@ -7,4 +7,5 @@ object Constants {
     const val TABLEORDERS: String = "tableOrders"
     const val EPAYMENT: String = "e-payment"
     const val CASHPAYMENT: String = "cash payment"
+    const val REPORTS: String = "reports"
 }

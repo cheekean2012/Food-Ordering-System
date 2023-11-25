@@ -4,10 +4,10 @@
     tools:showIn="navigation_view">
 
     <group android:id="@+id/table_drawer">
-        <item
-            android:id="@+id/add_food_item"
-            android:icon="@drawable/ic_add_food_item"
-            android:title="@string/add_food_item" />
+<!--        <item-->
+<!--            android:id="@+id/add_food_item"-->
+<!--            android:icon="@drawable/ic_add_food_item"-->
+<!--            android:title="@string/add_food_item" />-->
 
         <item
             android:id="@+id/generate_qr_code"

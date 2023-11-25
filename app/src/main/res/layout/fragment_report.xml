@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.reports.ReportFragment">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/topAppBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:fitsSystemWindows="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:elevation="0dp"
+            app:tint="?attr/colorOnSurface"
+            app:elevation="0dp"
+            android:background="?android:attr/windowBackground"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_left_arrow">
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/id_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_margin="8dp"
+        android:text="ID"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/divider"
+        app:layout_constraintEnd_toStartOf="@id/table_number_textview"
+        app:layout_constraintTop_toBottomOf="@id/topAppBarLayout"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/table_number_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_margin="8dp"
+        android:text="TABLE"
+        app:layout_constraintStart_toEndOf="@id/id_textview"
+        app:layout_constraintEnd_toStartOf="@id/price_textview"
+        app:layout_constraintTop_toBottomOf="@id/topAppBarLayout"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/price_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_margin="8dp"
+        android:text="PRICE"
+        app:layout_constraintStart_toEndOf="@id/table_number_textview"
+        app:layout_constraintEnd_toStartOf="@id/status_textview"
+        app:layout_constraintTop_toBottomOf="@id/topAppBarLayout"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/status_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_margin="8dp"
+        android:text="STATUS"
+        app:layout_constraintStart_toEndOf="@id/price_textview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topAppBarLayout"/>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/id_textview"
+        app:layout_constraintBottom_toTopOf="@id/report_item_list_recycleView" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/report_item_list_recycleView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/divider"
+        tools:listitem="@layout/list_report_item"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

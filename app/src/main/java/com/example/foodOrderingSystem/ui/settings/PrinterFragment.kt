@@ -1,4 +1,4 @@
-package com.example.foodOrderingSystem
+package com.example.foodOrderingSystem.ui.settings
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -26,7 +26,9 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.foodOrderingSystem.R
 import com.example.foodOrderingSystem.databinding.FragmentPrinterBinding
+import com.example.foodOrderingSystem.utils.ConnectionBluetoothManager
 import com.example.foodOrderingSystem.utils.Utils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
@@ -176,7 +178,8 @@ class PrinterFragment : Fragment() {
             }
             val fromWhere = arrayOf("A")
             val viewsWhere = intArrayOf(R.id.item_name)
-            ADAhere = SimpleAdapter(requireContext(), data, R.layout.list_bluetooth_item, fromWhere, viewsWhere)
+            ADAhere = SimpleAdapter(requireContext(), data,
+                R.layout.list_bluetooth_item, fromWhere, viewsWhere)
             btlst.adapter = ADAhere
             ADAhere.notifyDataSetChanged()
 

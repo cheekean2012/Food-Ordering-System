@@ -1,4 +1,4 @@
-package com.example.foodOrderingSystem
+package com.example.foodOrderingSystem.utils
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -70,31 +70,31 @@ class ConnectionBluetoothManager private constructor() {
         }
 
         fun setPrinterName(name: String) {
-            this.printerName = name
+            printerName = name
         }
 
         fun setBluetoothAdapter(adapter: BluetoothAdapter?) {
-            this.bluetoothAdapter = adapter
+            bluetoothAdapter = adapter
         }
 
         fun setBluetoothSocket(socket: BluetoothSocket?) {
-            this.bluetoothSocket = socket
+            bluetoothSocket = socket
         }
 
         fun setBluetoothDevice(device: BluetoothDevice?) {
-            this.bluetoothDevice = device
+            bluetoothDevice = device
         }
 
         fun setOutputStream(outputStream: OutputStream?) {
-            this.outputStream = outputStream
+            Companion.outputStream = outputStream
         }
 
         fun setInputStream(inputStream: InputStream?) {
-            this.inputStream = inputStream
+            Companion.inputStream = inputStream
         }
 
         fun setWorkerThread(workerThread: Thread?) {
-            this.workerThread = workerThread
+            Companion.workerThread = workerThread
         }
 
         // Other Bluetooth-related methods and properties

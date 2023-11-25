@@ -20,7 +20,6 @@ data class Tables(
 data class TableOrder (
     var id: String? = null,
     var startTime: String? = null,
-    var enpTime: String? = null,
     var tableNumber: String? = null,
     var customerOrder:MutableList<OrderItem>? = null,
     var customerOrdering:MutableList<OrderItem>? = null,

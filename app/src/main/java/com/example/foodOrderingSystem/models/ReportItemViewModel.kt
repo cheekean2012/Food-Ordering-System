@@ -4,12 +4,24 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class OrderItemViewModel : ViewModel() {
+class ReportItemViewModel: ViewModel() {
 
-    private val _orderItemList = MutableLiveData<MutableList<OrderItem>>()
+    private val _reportItemList = MutableLiveData<MutableList<Report>>()
 
     // Expose the LiveData as an immutable public property
-    val orderItemList: MutableLiveData<MutableList<OrderItem>> get() = _orderItemList
+    val reportItemList: MutableLiveData<MutableList<Report>> get() = _reportItemList
+
+    private val _reportId = MutableLiveData<String>()
+    val reportId: LiveData<String> get() = _reportId
+
+    private val _date = MutableLiveData<String>()
+    val date: LiveData<String> get() = _date
+
+    private val _status = MutableLiveData<String>()
+    val status: LiveData<String> get() = _status
+
+    private val _tableNumber = MutableLiveData<String>()
+    val tableNumber: LiveData<String> get() = _tableNumber
 
     private val _totalQuantity = MutableLiveData<String>()
     val totalQuantity: LiveData<String> get() = _totalQuantity
@@ -27,17 +39,27 @@ class OrderItemViewModel : ViewModel() {
     val finalTotal: LiveData<String> get() = _finalTotal
 
     init {
-        _orderItemList.value = ArrayList()
+        _reportItemList.value = ArrayList()
     }
 
-    fun setOrderItem(orderItem: MutableList<OrderItem>) {
-        _orderItemList.value = orderItem
+    fun setDate(date: String) {
+        _date.value = date
     }
 
-    fun deleteOrderItem(orderItem: OrderItem) {
-        val currentList = _orderItemList.value
-        currentList?.remove(orderItem)
-        _orderItemList.value = currentList!!
+    fun setStatus(status: String) {
+        _status.value = status
+    }
+
+    fun setTableNumber(number: String) {
+        _tableNumber.value = number
+    }
+
+    fun setReportItem(reportItem: MutableList<Report>) {
+        _reportItemList.value = reportItem
+    }
+
+    fun setReportId(id: String) {
+        _reportId.value = id
     }
 
     fun setTotalQuantity(quantity: String) {
@@ -61,7 +83,7 @@ class OrderItemViewModel : ViewModel() {
     }
 
     fun resetValue() {
-        _orderItemList.value!!.clear()
+        _reportItemList.value!!.clear()
         _roundup.value = "0.00"
         _totalQuantity.value = "0"
         _serviceCharge.value = "0.00"
@@ -69,4 +91,5 @@ class OrderItemViewModel : ViewModel() {
         _finalTotal.value = "0.00"
 
     }
+
 }

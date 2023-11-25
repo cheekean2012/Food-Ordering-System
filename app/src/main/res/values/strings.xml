@@ -33,4 +33,16 @@
     <string name="loading">Loading</string>
     <string name="cancel_reason">Cancel Reason</string>
     <string name="enter_cancel_reason">Enter Cancel Reason</string>
+    <string name="info">INFO</string>
+    <string name="item">ITEM</string>
+
+    <string name="table_number">Table: %s</string>
+    <string name="date">Date: %s</string>
+    <string name="status">Status: %s</string>
+    <string name="sub_total">SubTotal: %s</string>
+    <string name="service_charge">Service Charge: %s</string>
+    <string name="round_up">Round up: %s</string>
+    <string name="total_price">Total Price: %s</string>
+    <string name="total_quantity">Total Quantity: %s</string>
+
 </resources>

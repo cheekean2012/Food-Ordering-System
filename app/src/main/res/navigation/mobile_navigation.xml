@@ -47,6 +47,9 @@
         <action
             android:id="@+id/action_navigation_settings_to_navigation_printerFragment"
             app:destination="@id/navigation_printerFragment" />
+        <action
+            android:id="@+id/action_navigation_settings_to_reportFragment"
+            app:destination="@id/navigation_reportFragment" />
     </fragment>
     <fragment
         android:id="@+id/navigation_table_customer_order"
@@ -65,7 +68,7 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_menu_type"
-        android:name="com.example.foodOrderingSystem.menu.MenuTypeFragment"
+        android:name="com.example.foodOrderingSystem.ui.menus.MenuTypeFragment"
         android:label="fragment_menu_type"
         tools:layout="@layout/fragment_menu_type" >
         <action
@@ -76,7 +79,7 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_menu_item_list"
-        android:name="com.example.foodOrderingSystem.menu.MenuItemListFragment"
+        android:name="com.example.foodOrderingSystem.ui.menus.MenuItemListFragment"
         android:label="fragment_menu_item_list"
         tools:layout="@layout/fragment_menu_item_list" >
         <action
@@ -90,7 +93,7 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_menu_item_detail"
-        android:name="com.example.foodOrderingSystem.menu.MenuItemDetailFragment"
+        android:name="com.example.foodOrderingSystem.ui.menus.MenuItemDetailFragment"
         android:label="MenuItemDetailFragment"
         tools:layout="@layout/fragment_menu_item_detail">
         <action
@@ -101,13 +104,38 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_printerFragment"
-        android:name="com.example.foodOrderingSystem.PrinterFragment"
+        android:name="com.example.foodOrderingSystem.ui.settings.PrinterFragment"
         android:label="fragment_printer"
         tools:layout="@layout/fragment_printer" >
         <action
             android:id="@+id/action_navigation_printerFragment_to_navigation_settings"
             app:destination="@id/navigation_settings"
             app:popUpTo="@id/navigation_settings"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_reportFragment"
+        android:name="com.example.foodOrderingSystem.ui.reports.ReportFragment"
+        android:label="ReportFragment"
+        tools:layout="@layout/fragment_report">
+        <action
+            android:id="@+id/action_reportFragment_to_navigation_settings"
+            app:destination="@id/navigation_settings"
+            app:popUpTo="@id/navigation_settings"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_navigation_reportFragment_to_navigation_report_detail"
+            app:destination="@id/navigation_report_detail" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_report_detail"
+        android:name="com.example.foodOrderingSystem.ui.reports.ReportDetailFragment"
+        android:label="fragment_report_detail"
+        tools:layout="@layout/fragment_report_detail" >
+        <action
+            android:id="@+id/action_navigation_report_detail_to_navigation_reportFragment"
+            app:destination="@id/navigation_reportFragment"
+            app:popUpTo="@id/navigation_reportFragment"
             app:popUpToInclusive="true" />
     </fragment>
 
