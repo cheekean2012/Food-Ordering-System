@@ -77,8 +77,8 @@ class MenuItemViewModel: ViewModel() {
         _menuImage.value = image
     }
 
-    fun setMenuItemName(title: String) {
-        _menuItemName.value = title
+    fun setMenuItemName(itemName: String) {
+        _menuItemName.value = itemName
     }
 
     fun setType(type: String) {
@@ -89,8 +89,8 @@ class MenuItemViewModel: ViewModel() {
         _menuPrice.value = price
     }
 
-    fun setIngredient(description: String) {
-        _menuIngredient.value = description
+    fun setIngredient(ingredient: String) {
+        _menuIngredient.value = ingredient
     }
 
     fun setMenuAvailable(available: Boolean) {

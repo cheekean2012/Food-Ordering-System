@@ -45,24 +45,3 @@ data class PrintOrderItem (
     var customerOrdering: MutableList<OrderItem>? = null,
     var tableNumber: String? = null
 )
-//
-//@Entity(tableName = "menu_types")
-//data class MenuType(
-//    @PrimaryKey val id: String,
-//    @ColumnInfo(name = "menu_type") val menuType: String
-//)
-//
-//@Dao
-//interface MenuTypeDao {
-//    @Query("SELECT * FROM menu_types")
-//    fun getAllMenuTypes(): LiveData<MutableList<MenuType>>
-//
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun insertMenuType(menuType: MenuType)
-//
-//    @Update
-//    suspend fun updateMenuType(menuType: MenuType)
-//
-//    @Delete
-//    suspend fun deleteMenuType(menuType: MenuType)
-//}

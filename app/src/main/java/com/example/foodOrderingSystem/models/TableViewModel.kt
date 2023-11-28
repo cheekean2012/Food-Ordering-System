@@ -34,7 +34,7 @@ class TableViewModel : ViewModel() {
         _tableId.value = id
     }
 
-    fun setTableNumber(id: String) {
-        _tableNumber.value = id
+    fun setTableNumber(number: String) {
+        _tableNumber.value = number
     }
 }

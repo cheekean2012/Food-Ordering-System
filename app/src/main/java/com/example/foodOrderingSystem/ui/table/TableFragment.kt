@@ -148,7 +148,7 @@ class TableFragment : Fragment() {
     private val refreshRunnable = object : Runnable {
         override fun run() {
             print()
-            //handler.postDelayed(this, 5000)
+            handler.postDelayed(this, 5000)
         }
     }
 
@@ -263,7 +263,7 @@ class TableFragment : Fragment() {
         return "$header$emptyLine$orderDetails"
     }
 
-    fun intentPrint(textValue: String) {
+    private fun intentPrint(textValue: String) {
         var prName = ""
         prName = ConnectionBluetoothManager.getPrinterName().toString()
         if (prName.isNotEmpty()) {

@@ -7,8 +7,6 @@ import androidx.lifecycle.ViewModel
 class ReportDetailItemViewModel: ViewModel() {
 
     private val _reportItemList = MutableLiveData<MutableList<OrderItem>>()
-
-    // Expose the LiveData as an immutable public property
     val reportItemList: MutableLiveData<MutableList<OrderItem>> get() = _reportItemList
 
     init {

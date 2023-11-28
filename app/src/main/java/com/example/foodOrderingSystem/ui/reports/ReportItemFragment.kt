@@ -26,7 +26,6 @@ class ReportItemFragment : Fragment() {
     private val reportDetailItemViewModel: ReportDetailItemViewModel by activityViewModels()
     private val reportItemViewModel: ReportItemViewModel by activityViewModels()
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,5 +55,4 @@ class ReportItemFragment : Fragment() {
 
         Firestore().getCustomerReportItemDetail(this, recyclerView, reportId)
     }
-
 }

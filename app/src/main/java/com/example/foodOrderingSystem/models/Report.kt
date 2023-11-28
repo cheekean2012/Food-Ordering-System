@@ -16,4 +16,5 @@ data class Report (
     var orderItem: MutableList<OrderItem>? = null,
     var status: String? = null,
     @ServerTimestamp var dateTime: com.google.firebase.Timestamp? = null,
+    var cancelReason: String? = null
 )

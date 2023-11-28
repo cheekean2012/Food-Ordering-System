@@ -53,6 +53,7 @@ class ReportListAdapter (
             reportItemViewModel.setTotalQuantity(getPosition.totalQuantity.toString())
             reportItemViewModel.setServiceCharge(getPosition.serviceCharge.toString())
             reportItemViewModel.setFinalTotal(getPosition.totalPrice.toString())
+            reportItemViewModel.setCancelReason(getPosition.cancelReason.toString())
 
             val subTotal = getPosition.subTotal!!.toDouble()
             val serviceCharge = getPosition.serviceCharge!!.toDouble()

@@ -8,8 +8,6 @@ import androidx.lifecycle.ViewModel
 class MenuTypeViewModel : ViewModel() {
 
     private val _menuTypeList = MutableLiveData<MutableList<MenuType>>()
-
-    // Expose the LiveData as an immutable public property
     val menuTypeList: MutableLiveData<MutableList<MenuType>> get() = _menuTypeList
 
     private val _menuTypeId = MutableLiveData<String?>()
@@ -54,40 +52,3 @@ class MenuTypeViewModel : ViewModel() {
         _menuType.value = type
     }
 }
-
-//class MenuViewModel(application: Application) : AndroidViewModel(application) {
-//
-//    private val menuTypeDao: MenuTypeDao
-//
-//    init {
-//        val database = AppDatabase.getDatabase(application)
-//        menuTypeDao = database.menuTypeDao()
-//    }
-//
-//    private val _menuTypeList = MutableLiveData<List<MenuType>>()
-//    val menuTypeList: LiveData<List<MenuType>> = _menuTypeList
-//
-//    fun addMenuType(menuType: MenuType) {
-//        viewModelScope.launch {
-//            menuTypeDao.insertMenuType(menuType)
-//            // Update the MutableLiveData with the new list
-//            _menuTypeList.value = menuTypeDao.getAllMenuTypes().value?.toMutableList()
-//        }
-//    }
-//
-//    fun updateMenuType(menuType: MenuType) {
-//        viewModelScope.launch {
-//            menuTypeDao.updateMenuType(menuType)
-//            // Update the MutableLiveData with the new list
-//            _menuTypeList.value = menuTypeDao.getAllMenuTypes().value?.toMutableList()
-//        }
-//    }
-//
-//    fun deleteMenuType(menuType: MenuType) {
-//        viewModelScope.launch {
-//            menuTypeDao.deleteMenuType(menuType)
-//            // Update the MutableLiveData with the new list
-//            _menuTypeList.value = menuTypeDao.getAllMenuTypes().value?.toMutableList()
-//        }
-//    }
-//}

@@ -101,13 +101,7 @@ class PrinterFragment : Fragment() {
         } else {
             // Bluetooth is not connected, handle
             Toast.makeText(requireContext(), "Bluetooth is not connected", Toast.LENGTH_SHORT).show()
-            //checkPermission()
         }
-//        if (btPermission) {
-//            printTest()
-//        } else {
-//            checkPermission()
-//        }
     }
 
     // Function to check Bluetooth connection status
@@ -133,8 +127,6 @@ class PrinterFragment : Fragment() {
 
     private fun checkPermission() {
         bluetoothManager = requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-
-//        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
 
         bluetoothAdapter = bluetoothManager?.adapter
 
@@ -226,7 +218,7 @@ class PrinterFragment : Fragment() {
                                         )
                                     )
                                     disconnectBluetoothSocket()
-// Define a boolean flag to control the thread
+                                    // Define a boolean flag to control the thread
                                     var isConnectionThreadRunning = true
                                     showProgress()
 
@@ -412,10 +404,7 @@ class PrinterFragment : Fragment() {
                                     readBuffer[readBufferPosition++] = b
                                 }
                             }
-                        } //else {
-                            // No data available, sleep for a short duration
-//                            Thread.sleep(DELAY_TIME.toLong())
-//                        }
+                        }
                     } catch (ex: IOException) {
                         stopWorker = true
                         Log.d("get error from begin listen data", ex.toString())
@@ -457,14 +446,10 @@ class PrinterFragment : Fragment() {
             // Combine the elements for printing
             val printText = "$centeredRestaurantName$emptyLines\n$centeredDummyAddress$emptyLines\n$separatorLine"
 
-
-//            // Inside your Fragment/Activity
+            // Inside your Fragment/Activity
             lifecycleScope.launch(Dispatchers.IO) {
                 intentPrint(printText)
             }
-            //intentPrint(BILL)
-//            val testMessage = "Hello, this is a test print."
-//            intentPrint(testMessage)
 
         } catch (ex: java.lang.Exception) {
             value += "$ex\nExcep IntentPrint \n"
@@ -474,7 +459,7 @@ class PrinterFragment : Fragment() {
     }
 
 
-    fun intentPrint(textValue: String) {
+    private fun intentPrint(textValue: String) {
         var prName = ""
         prName = ConnectionBluetoothManager.getPrinterName().toString()
         if (prName.isNotEmpty()) {
@@ -551,7 +536,7 @@ class PrinterFragment : Fragment() {
         ConnectionBluetoothManager.disconnectBluetooth()
     }
 
-    fun showProgress() {
+    private fun showProgress() {
         mProgressDialog = Dialog(requireContext())
 
         mProgressDialog.setContentView(R.layout.dialog_progress)
@@ -562,7 +547,7 @@ class PrinterFragment : Fragment() {
         mProgressDialog.show()
     }
 
-    fun closeProgress() {
+    private fun closeProgress() {
         mProgressDialog.dismiss()
     }
 

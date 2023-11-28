@@ -1,6 +1,7 @@
 package com.example.foodOrderingSystem.ui.reports
 
 import android.os.Bundle
+import android.text.TextUtils
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -38,6 +39,9 @@ class ReportInfoFragment : Fragment() {
             totalPriceTextview.text = getString(R.string.total_price, formatCurrency(report.finalTotal.value))
 
             totalQuantityTextview.text = getString(R.string.total_quantity, report.totalQuantity.value.toString())
+            cancelReasonTextview.text = "Cancel Reason: " + report.cancelReason.value.toString()
+
+            cancelReasonTextview.visibility = if (report.cancelReason.value.toString().isEmpty()) View.INVISIBLE else View.VISIBLE
         }
     }
 

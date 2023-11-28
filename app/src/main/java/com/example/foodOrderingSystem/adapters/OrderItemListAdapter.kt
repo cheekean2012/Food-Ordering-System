@@ -111,25 +111,6 @@ class OrderItemListAdapter(
         holder.remark.text = "Remark: "+ item.remarks
         holder.takeaway.text = if (item.takeaway!!) "Takeaway" else ""
 
-//        if (item.totalPrice != null) {
-//            subTotal += item.totalPrice!!
-//            orderItemViewModel.setSubTotalPrice(subTotal.toString())
-//
-//            totalQuantity += item.quantity!!
-//            orderItemViewModel.setTotalQuantity(totalQuantity.toString())
-//
-//            serviceCharge = subTotal * serviceChargePercentage
-//            orderItemViewModel.setServiceCharge(serviceCharge.toString())
-//
-//            beforeRoundup = subTotal + serviceCharge
-//
-//            roundup =  roundup(subTotal, serviceChargePercentage) - beforeRoundup
-//            orderItemViewModel.setRoundup(roundup.toString())
-//
-//            finalTotal = beforeRoundup + roundup
-//            orderItemViewModel.setFinalTotal(finalTotal.toString())
-//        }
-
         holder.remark.visibility = if (!TextUtils.isEmpty(holder.remark.text)) View.VISIBLE else View.INVISIBLE
         holder.takeaway.visibility = if (!TextUtils.isEmpty(holder.takeaway.text)) View.VISIBLE else View.INVISIBLE
     }

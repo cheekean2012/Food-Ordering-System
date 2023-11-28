@@ -248,7 +248,7 @@ class Firestore {
                 mFirestore.collection(Constants.TABLEORDERS)
                     .document(id)
                     .update(mapOf(
-                        "status" to "CANCEL",
+                        "status" to "CANCELED",
                         "reason" to cancelReason
                     )).addOnSuccessListener {
                         Utils().backToPrevious(activity, R.id.navigation_table)

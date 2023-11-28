@@ -93,23 +93,6 @@ class TableCustomerOrderFragment: Fragment() {
     private var value = ""
     private val outputStreamLock = Any()
 
-    private val bluetoothPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            bluetoothManager = requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-            bluetoothAdapter = bluetoothManager?.adapter
-
-            if (bluetoothAdapter?.isEnabled == false) {
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                btActivityResultLauncher.launch(enableBtIntent)
-            } else {
-//                btScan()
-            }
-        }
-
-    }
-
     private val btActivityResultLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
@@ -168,11 +151,6 @@ class TableCustomerOrderFragment: Fragment() {
 
             paymentButton.setOnClickListener { openDialogPayment() }
 
-//            tableViewModel.tableId.observe(viewLifecycleOwner) { tableId ->
-//                // Get data from firebase using the new tableId
-//                Firestore().getCustomerOrder(this@TableCustomerOrderFragment, recyclerView, orderItemViewModel, tableId.toString())
-//            }
-
             orderItemViewModel.subTotalPrice.observe(viewLifecycleOwner) { subTotalPrice ->
                 // Convert to Double and update UI with subTotalPrice
                 subTotalPriceTextView.text = String.format("%.2f", subTotalPrice!!.toDoubleOrNull() ?: 0.0)
@@ -199,13 +177,8 @@ class TableCustomerOrderFragment: Fragment() {
     private fun navDrawerNavigation(menuItem: MenuItem): Boolean {
 
         return when (menuItem.itemId) {
-//            R.id.add_food_item -> {
-//    //                binding.drawerLayout.closeDrawer(GravityCompat.START)
-//                true
-//            }
-
             R.id.generate_qr_code -> {
-//                binding.drawerLayout.closeDrawer(GravityCompat.START)
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
                 openDialogQrCode();
                 true
             }
@@ -283,7 +256,8 @@ class TableCustomerOrderFragment: Fragment() {
                 subTotalPrice,
                 itemList,
                 "COMPLETED",
-                timeStamp
+                timeStamp,
+                ""
             )
             Firestore().addReport(this, report)
 
@@ -327,7 +301,8 @@ class TableCustomerOrderFragment: Fragment() {
                             subTotalPrice,
                             itemList,
                             "COMPLETED",
-                            timeStamp
+                            timeStamp,
+                            ""
                         )
                         Firestore().addReport(this, report)
 
@@ -360,6 +335,39 @@ class TableCustomerOrderFragment: Fragment() {
                     val tableId = tableViewModel.tableId.value.toString()
                     dialog.dismiss()
                     Firestore().updateTableCancelReason(this, tableId, cancelReason)
+
+                    val id = UUID.randomUUID().toString()
+                    val tableNumber = tableViewModel.tableNumber.value.toString()
+                    val currentTimestamp = Timestamp(System.currentTimeMillis())
+
+                    // Using the toInstant() method to get an Instant and then extracting seconds
+                    val unixTimestampSeconds = currentTimestamp.toInstant().epochSecond
+                    println("Current Timestamp: $unixTimestampSeconds")
+
+                    // Generating current date
+                    val currentDate: LocalDateTime = LocalDateTime.now()
+                    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/YYYY HH:mm:ss")
+                    val formattedDate: String = currentDate.format(formatter)
+                    println("Current Date: $formattedDate")
+
+                    val timeStamp = com.google.firebase.Timestamp.now()
+
+                    val report = Report (
+                        id,
+                        tableId,
+                        tableNumber,
+                        unixTimestampSeconds.toString(),
+                        formattedDate,
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        null,
+                        "CANCELED",
+                        timeStamp,
+                        cancelReason
+                    )
+                    Firestore().addReport(this, report)
                 } else {
                     Toast.makeText(requireContext(), "Please enter the reason", Toast.LENGTH_SHORT).show()
                 }
@@ -577,7 +585,6 @@ class TableCustomerOrderFragment: Fragment() {
         } else {
             // Bluetooth is not connected, handle
             Toast.makeText(requireContext(), "Bluetooth is not connected", Toast.LENGTH_SHORT).show()
-//            checkPermission()
         }
     }
 
@@ -586,9 +593,6 @@ class TableCustomerOrderFragment: Fragment() {
         startTime: String,
         formattedTableNumber: String
     ) {
-        // Convert the Bitmap to a byte array
-//        val qrCodeData = convertBitmapToByteArray(qrCode)
-
         printPic.init(qrCode)
         val qrCodeData = printPic.printDraw()
 
@@ -608,12 +612,6 @@ class TableCustomerOrderFragment: Fragment() {
         Log.d("QR Code Data", qrCodeData.contentToString())
         Log.d("Text Data", timeData.contentToString())
 
-        // Combine the QR code data and text data
-//        val printData = ByteArray( qrCodeData.size + timeData.size)
-//        System.arraycopy(qrCodeData, 0, printData, 0, qrCodeData.size)
-//        System.arraycopy(timeData, 0, printData, qrCodeData.size, timeData.size)
-
-
         // Check if your Bluetooth connection is still valid
         if (checkBluetoothConnectionStatus()) {
             // Send the print data to the printer
@@ -622,12 +620,6 @@ class TableCustomerOrderFragment: Fragment() {
             // Handle the case where the Bluetooth connection is lost
             Toast.makeText(requireContext(), "Bluetooth connection lost", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun convertBitmapToByteArray(bitmap: Bitmap): ByteArray {
-        val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        return stream.toByteArray()
     }
 
     private fun generateQRCode(data: String): Bitmap? {
@@ -652,7 +644,7 @@ class TableCustomerOrderFragment: Fragment() {
         return bitmap
     }
 
-    fun intentPrint(textValue: String) {
+    private fun intentPrint(textValue: String) {
         var prName = ""
         prName = ConnectionBluetoothManager.getPrinterName().toString()
         if (prName.isNotEmpty()) {
@@ -823,21 +815,6 @@ class TableCustomerOrderFragment: Fragment() {
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
-    }
-
-    fun showProgress() {
-        mProgressDialog = Dialog(requireContext())
-
-        mProgressDialog.setContentView(R.layout.dialog_progress)
-
-        mProgressDialog.setCancelable(false)
-        mProgressDialog.setCanceledOnTouchOutside(false)
-
-        mProgressDialog.show()
-    }
-
-    fun closeProgress() {
-        mProgressDialog.dismiss()
     }
 
     private fun backToPrevious() {

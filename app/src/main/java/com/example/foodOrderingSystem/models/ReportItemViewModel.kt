@@ -38,6 +38,9 @@ class ReportItemViewModel: ViewModel() {
     private val _finalTotal = MutableLiveData<String>()
     val finalTotal: LiveData<String> get() = _finalTotal
 
+    private val _cancelReason = MutableLiveData<String>()
+    val cancelReason: LiveData<String> get() = _cancelReason
+
     init {
         _reportItemList.value = ArrayList()
     }
@@ -80,6 +83,10 @@ class ReportItemViewModel: ViewModel() {
 
     fun setFinalTotal(price: String) {
         _finalTotal.value = price
+    }
+
+    fun setCancelReason(reason: String) {
+        _cancelReason.value = reason
     }
 
     fun resetValue() {
