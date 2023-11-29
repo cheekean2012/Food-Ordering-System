@@ -274,43 +274,48 @@ class TableCustomerOrderFragment: Fragment() {
 
             cashButton.setOnClickListener {
                 val cashString = cashEditText.text.toString()
+                val cashRegex = Regex("^\\d+(\\.\\d{1,2})?$")
 
-                if (cashString.isNotEmpty()) {
+                if (cashString.isNotEmpty() && cashRegex.matches(cashString)) {
                     val cash = cashString.toDouble()
                     val total = orderItemViewModel.finalTotal.value?.toDouble()
 
-                    if (cash >= total!!) {
-                        val change = cash - total
-                        changeTextView.text = "Change: RM" + String.format("%.2f", change)
-                        changeTextView.visibility = View.VISIBLE
-                        cashButton.visibility = View.GONE
+                    if (total != null) {
+                        if (cash >= total) {
+                            val change = cash - total
+                            changeTextView.text = "Change: RM" + String.format("%.2f", change)
+                            changeTextView.visibility = View.VISIBLE
+                            cashButton.visibility = View.GONE
 
-                        binding.paymentButton.visibility = View.GONE
+                            binding.paymentButton.visibility = View.GONE
 
-                        Firestore().updateCustomerPaymentMethod(this, tableId, Constants.CASHPAYMENT)
+                            Firestore().updateCustomerPaymentMethod(this, tableId, Constants.CASHPAYMENT)
 
-                        val report = Report (
-                            id,
-                            tableId,
-                            tableNumber,
-                            unixTimestampSeconds.toString(),
-                            formattedDate,
-                            totalQuantity,
-                            finalTotal,
-                            serviceCharge,
-                            subTotalPrice,
-                            itemList,
-                            "COMPLETED",
-                            timeStamp,
-                            ""
-                        )
-                        Firestore().addReport(this, report)
+                            val report = Report (
+                                id,
+                                tableId,
+                                tableNumber,
+                                unixTimestampSeconds.toString(),
+                                formattedDate,
+                                totalQuantity,
+                                finalTotal,
+                                serviceCharge,
+                                subTotalPrice,
+                                itemList,
+                                "COMPLETED",
+                                timeStamp,
+                                ""
+                            )
+                            Firestore().addReport(this, report)
+                        } else {
+                            Toast.makeText(requireContext(), "The cash was not enough", Toast.LENGTH_SHORT).show()
+                        }
 
                     } else {
-                        Toast.makeText(requireContext(), "The cash was not enough", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Invalid, current total amount is 0", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Toast.makeText(requireContext(), "Please enter the value", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Please enter a valid cash amount (e.g., 23 or 23.45)", Toast.LENGTH_SHORT).show()
                 }
             }
 

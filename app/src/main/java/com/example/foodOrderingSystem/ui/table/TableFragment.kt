@@ -258,6 +258,9 @@ class TableFragment : Fragment() {
             }
             // Separator line between items
             append(separatorLine)
+            append(emptyLine)
+            append(emptyLine)
+            append(emptyLine)
         }
 
         return "$header$emptyLine$orderDetails"

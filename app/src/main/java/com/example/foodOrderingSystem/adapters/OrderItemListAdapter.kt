@@ -66,6 +66,7 @@ class OrderItemListAdapter(
 
                     // Notify the adapter that an item has been removed
                     notifyItemRemoved(adapterPosition)
+                    calculateTotals()
                     Firestore().deleteCustomerOrderItem(getPosition.id, tableId)
                 }
                 .show()
